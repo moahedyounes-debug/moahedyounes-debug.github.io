@@ -91,6 +91,9 @@
   <div id="visitBox" class="section main-car-card">
     <h3 class="section-title">📝 تسجيل زيارة جديدة</h3>
 
+    <!-- لو عندك عضوية حطها هنا -->
+    <!-- <input type="hidden" id="membership" value=""> -->
+
     <!-- الصف الأول -->
     <div class="row4">
       <div>
@@ -439,7 +442,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const carsContainer = document.getElementById("carsContainer");
   const template = document.getElementById("carCardTemplate");
 
-  /* إضافة سيارة جديدة */
   btnAddCar.onclick = () => {
     const clone = template.content.cloneNode(true);
     const card = clone.querySelector(".car-card");
