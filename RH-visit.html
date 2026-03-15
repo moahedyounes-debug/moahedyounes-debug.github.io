@@ -478,9 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const card = clone.querySelector(".car-card");
 
         /* حذف السيارة */
-        card.querySelector(".btn-remove-car").onclick = () => {
-            card.remove();
-        };
+        card.querySelector(".btn-remove-car").onclick = () => card.remove();
 
         /* تحميل البيانات */
         loadCarTypesIntoCard(card);
@@ -495,17 +493,39 @@ document.addEventListener("DOMContentLoaded", () => {
         attachTotalEvents(card);
 
         /* إضافة خدمة */
-        card.querySelector(".btnAddService").onclick = () => {
-            addServiceToExtraCar(card);
-        };
+        card.querySelector(".btnAddService").onclick = () => addServiceToExtraCar(card);
 
         carsContainer.appendChild(card);
     };
+
+    /* فحص جاهزية السيارة */
+    function isCarValid(card) {
+        const required = [
+            ".plate_numbers",
+            ".car_type",
+            ".car_model",
+            ".service_type",
+            ".service_detail",
+            ".employee_in",
+            ".branch",
+            ".parking_slot"
+        ];
+
+        for (const sel of required) {
+            const el = card.querySelector(sel);
+            if (!el || !el.value || el.value.trim() === "") {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /* تحميل البراند والموديل */
     function loadCarTypesIntoCard(card) {
         const brandSel = card.querySelector(".car_type");
         const modelSel = card.querySelector(".car_model");
+        const sizeInput = card.querySelector(".car_size");
 
         brandSel.innerHTML = '<option value="">— اختر —</option>';
         modelSel.innerHTML = '<option value="">— اختر —</option>';
@@ -528,6 +548,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 opt.textContent = m;
                 modelSel.appendChild(opt);
             });
+        };
+
+        modelSel.onchange = () => {
+            const row = carTypesData.find(
+                x => x[0] === brandSel.value && x[1] === modelSel.value
+            );
+            sizeInput.value = row ? row[2] : "";
         };
     }
 
@@ -577,25 +604,24 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    /* تحميل الموظفين — النسخة الصحيحة */
+    /* تحميل الموظفين */
     function loadEmployeesIntoCard(card) {
         const mainEmp = document.getElementById("employee_in");
         const sel = card.querySelector(".employee_in");
         sel.innerHTML = mainEmp.innerHTML;
     }
 
-    /* تحميل الفروع — النسخة الصحيحة */
+    /* تحميل الفروع */
     function loadBranchesIntoCard(card) {
         const mainBranch = document.getElementById("branch");
         const sel = card.querySelector(".branch");
 
         sel.innerHTML = mainBranch.innerHTML;
 
-        // ضبط الفرع تلقائيًا على مكة
         if (sel.querySelector('option[value="مكة"]')) {
             sel.value = "مكة";
         } else {
-            sel.selectedIndex = 1; // أول فرع بعد "اختر"
+            sel.selectedIndex = 1;
         }
     }
 
@@ -625,7 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    /* إضافة خدمة داخل السيارة الإضافية */
+    /* إضافة خدمة */
     function addServiceToExtraCar(card) {
         const list = card.querySelector(".servicesList");
         const typeSel = card.querySelector(".service_type");
@@ -658,7 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
         calculateExtraCarTotal(card);
     }
 
-    /* حساب إجمالي السيارة */
+    /* حساب الإجمالي */
     function calculateExtraCarTotal(card) {
         let total = 0;
 
@@ -687,6 +713,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const cards = document.querySelectorAll(".car-card");
 
         for (const card of cards) {
+
+            if (!isCarValid(card)) continue;
+
             const payload = {
                 visit_id: mainVisitId,
                 plate_numbers: card.querySelector(".plate_numbers").value,
