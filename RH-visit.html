@@ -9,34 +9,59 @@
 <script src="api.js"></script>
 
 <style>
-.row4 {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-}
-.row5 {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-}
+.row4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+.row5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
+
 .car-card {
     border: 2px solid #ddd;
     padding: 15px;
     border-radius: 10px;
     background: #fafafa;
-    margin-top: 20px;
+    margin-top: 25px;
 }
+
 .car-card .btn-remove-car {
-    width: auto !important;
-    display: inline-block !important;
-    padding: 6px 12px;
     background: #d9534f;
     color: white;
+    padding: 6px 12px;
     border: none;
     border-radius: 6px;
-    float: left;
-    margin-bottom: 10px;
     cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.car-card .total {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    z-index: 999999;
+}
+
+.toast {
+    background: #ffffff;
+    color: #b30000;
+    border: 2px solid #b30000;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: fadeInOut 3s ease forwards;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-20px); }
 }
 </style>
 </head>
@@ -53,7 +78,6 @@
 <div class="summary-bar">
 <div class="summary-item">
 <div class="label">الزيارات النشطة</div>
-<div class="label">الخدمات الحالية</div>
 <div class="value" id="summaryActive">0</div>
 </div>
 <div class="summary-item">
@@ -74,7 +98,7 @@
 <button id="btnRefreshActive" class="btn-secondary full">🔄 تحديث القائمة</button>
 </div>
 
-<!-- تسجيل الزيارة -->
+<!-- تسجيل الزيارة الأساسية -->
 <div id="visitBox" class="section">
 <h3 class="section-title">📝 تسجيل زيارة جديدة</h3>
 
@@ -82,23 +106,19 @@
 <div class="row4">
     <div>
         <label>أرقام اللوحة *</label>
-        <input type="text" id="plate_numbers" placeholder="1234" required>
+        <input type="text" id="plate_numbers" required>
     </div>
     <div>
         <label>حروف اللوحة</label>
-        <input type="text" id="plate_letters" placeholder="ABC">
+        <input type="text" id="plate_letters">
     </div>
     <div>
         <label>براند السيارة *</label>
-        <select id="car_type" required>
-            <option value="">— اختر البراند —</option>
-        </select>
+        <select id="car_type" required></select>
     </div>
     <div>
         <label>موديل السيارة *</label>
-        <select id="car_model" required>
-            <option value="">— اختر الموديل —</option>
-        </select>
+        <select id="car_model" required></select>
     </div>
 </div>
 
@@ -110,21 +130,15 @@
     </div>
     <div>
         <label>نوع الخدمة *</label>
-        <select id="service_type" required>
-            <option value="">— اختر النوع —</option>
-        </select>
+        <select id="service_type" required></select>
     </div>
     <div>
         <label>تفاصيل الخدمة *</label>
-        <select id="service_detail" required>
-            <option value="">— اختر الخدمة —</option>
-        </select>
+        <select id="service_detail" required></select>
     </div>
     <div>
         <label>الموظف *</label>
-        <select id="employee_in" required>
-            <option value="">— اختر الموظف —</option>
-        </select>
+        <select id="employee_in" required></select>
     </div>
 </div>
 
@@ -135,27 +149,23 @@
         <input type="number" id="price" readonly>
     </div>
     <div>
-        <label>النقاط / العمولة</label>
+        <label>النقاط</label>
         <input type="number" id="points" readonly>
     </div>
     <div>
         <label>الخصم</label>
-        <input type="number" id="discount" placeholder="0" value="0">
+        <input type="number" id="discount" value="0">
     </div>
     <div>
         <label>الإكرامية</label>
-        <input type="number" id="tip" placeholder="0" value="0">
+        <input type="number" id="tip" value="0">
     </div>
     <div>
-        <label>رقم الموقف *</label>
+        <label>الموقف *</label>
         <select id="parking_slot" required>
-            <option value="">— اختر الموقف —</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
+            <option value="">— اختر —</option>
+            <option>1</option><option>2</option><option>3</option>
+            <option>4</option><option>5</option><option>6</option>
         </select>
     </div>
 </div>
@@ -164,30 +174,25 @@
 <div class="row4" style="margin-top:15px;">
     <div>
         <label>الفرع *</label>
-        <select id="branch" required>
-            <option value="">— اختر الفرع —</option>
-        </select>
+        <select id="branch" required></select>
     </div>
-
     <div>
         <label>حالة الدفع *</label>
         <select id="payment_status" required>
-            <option value="">— اختر الحالة —</option>
+            <option value="">— اختر —</option>
             <option value="مدفوع">مدفوع</option>
             <option value="غير مدفوع">غير مدفوع</option>
         </select>
     </div>
-
     <div id="payment_method_wrapper" style="display:none;">
         <label>طريقة الدفع *</label>
         <select id="payment_method">
-            <option value="">— اختر الطريقة —</option>
+            <option value="">— اختر —</option>
             <option value="كاش">كاش</option>
             <option value="شبكة">شبكة</option>
-            <option value="جزئي">جزئي (كاش + شبكة)</option>
+            <option value="جزئي">جزئي</option>
         </select>
     </div>
-
     <div></div>
 </div>
 
@@ -195,26 +200,26 @@
 <div id="partial_payment_box" style="display:none; margin-top:15px;">
     <div class="row4">
         <div>
-            <label>مبلغ الكاش</label>
-            <input type="number" id="cash_amount" placeholder="0">
+            <label>الكاش</label>
+            <input type="number" id="cash_amount" value="0">
         </div>
         <div>
-            <label>مبلغ الشبكة</label>
-            <input type="number" id="card_amount" placeholder="0">
+            <label>الشبكة</label>
+            <input type="number" id="card_amount" value="0">
         </div>
     </div>
-    <div class="total">المجموع المدفوع: <span id="paid_total">0</span> ريال</div>
 </div>
 
 <button id="btnAddService" class="btn-secondary full">➕ إضافة خدمة</button>
 
-<div id="servicesList" class="services-box"></div>
+<div id="servicesList"></div>
 
 <div class="total">الإجمالي: <span id="totalPrice">0</span> ريال</div>
 
-<button id="btnSubmitVisit" class="btn-primary full" style="margin-top:20px;" onclick="submitVisit()">💾 تسجيل الزيارة</button>
+<button id="btnSubmitVisit" class="btn-primary full" onclick="submitVisit()">💾 تسجيل الزيارة</button>
 
 </div>
+
 <!-- زر إضافة سيارة جديدة -->
 <button id="btnAddCar" class="btn-secondary full" style="margin-top:25px;">
     ➕ إضافة سيارة جديدة
@@ -223,63 +228,126 @@
 <!-- حاوية السيارات الإضافية -->
 <div id="carsContainer"></div>
 
-<!-- قالب السيارة الإضافية -->
+<!-- قالب سيارة إضافية كاملة -->
 <template id="carCardTemplate">
 <div class="car-card">
 
-    <button class="btn-remove-car">🗑 حذف</button>
+<button class="btn-remove-car">🗑 حذف</button>
 
-    <div class="row4" style="margin-top:15px;">
+<h3>🚗 سيارة إضافية</h3>
+
+<!-- نفس النموذج الأساسي لكن classes -->
+<div class="row4">
+    <div>
+        <label>أرقام اللوحة *</label>
+        <input type="text" class="plate_numbers">
+    </div>
+    <div>
+        <label>حروف اللوحة</label>
+        <input type="text" class="plate_letters">
+    </div>
+    <div>
+        <label>براند السيارة *</label>
+        <select class="car_type"></select>
+    </div>
+    <div>
+        <label>موديل السيارة *</label>
+        <select class="car_model"></select>
+    </div>
+</div>
+
+<div class="row4" style="margin-top:15px;">
+    <div>
+        <label>الحجم</label>
+        <input type="text" class="car_size" readonly>
+    </div>
+    <div>
+        <label>نوع الخدمة *</label>
+        <select class="service_type"></select>
+    </div>
+    <div>
+        <label>تفاصيل الخدمة *</label>
+        <select class="service_detail"></select>
+    </div>
+    <div>
+        <label>الموظف *</label>
+        <select class="employee_in"></select>
+    </div>
+</div>
+
+<div class="row5" style="margin-top:15px;">
+    <div>
+        <label>السعر</label>
+        <input type="number" class="price" readonly>
+    </div>
+    <div>
+        <label>النقاط</label>
+        <input type="number" class="points" readonly>
+    </div>
+    <div>
+        <label>الخصم</label>
+        <input type="number" class="discount" value="0">
+    </div>
+    <div>
+        <label>الإكرامية</label>
+        <input type="number" class="tip" value="0">
+    </div>
+    <div>
+        <label>الموقف *</label>
+        <select class="parking_slot">
+            <option value="">— اختر —</option>
+            <option>1</option><option>2</option><option>3</option>
+            <option>4</option><option>5</option><option>6</option>
+        </select>
+    </div>
+</div>
+
+<div class="row4" style="margin-top:15px;">
+    <div>
+        <label>الفرع *</label>
+        <select class="branch"></select>
+    </div>
+    <div>
+        <label>حالة الدفع *</label>
+        <select class="payment_status">
+            <option value="">— اختر —</option>
+            <option value="مدفوع">مدفوع</option>
+            <option value="غير مدفوع">غير مدفوع</option>
+        </select>
+    </div>
+    <div class="payment_method_wrapper" style="display:none;">
+        <label>طريقة الدفع *</label>
+        <select class="payment_method">
+            <option value="">— اختر —</option>
+            <option value="كاش">كاش</option>
+            <option value="شبكة">شبكة</option>
+            <option value="جزئي">جزئي</option>
+        </select>
+    </div>
+    <div></div>
+</div>
+
+<div class="partial_payment_box" style="display:none; margin-top:15px;">
+    <div class="row4">
         <div>
-            <label>أرقام اللوحة *</label>
-            <input type="text" class="plate_numbers">
+            <label>الكاش</label>
+            <input type="number" class="cash_amount" value="0">
         </div>
-
         <div>
-            <label>حروف اللوحة *</label>
-            <input type="text" class="plate_letters">
-        </div>
-
-        <div>
-            <label>براند السيارة *</label>
-            <select class="car_type"></select>
-        </div>
-
-        <div>
-            <label>موديل السيارة *</label>
-            <select class="car_model"></select>
+            <label>الشبكة</label>
+            <input type="number" class="card_amount" value="0">
         </div>
     </div>
+</div>
 
-    <div class="row4" style="margin-top:15px;">
-        <div>
-            <label>نوع الخدمة *</label>
-            <select class="service_type"></select>
-        </div>
+<button class="btnAddService btn-secondary full">➕ إضافة خدمة</button>
 
-        <div>
-            <label>تفاصيل الخدمة *</label>
-            <select class="service_detail"></select>
-        </div>
+<div class="servicesList"></div>
 
-        <div>
-            <label>الموظف *</label>
-            <select class="employee_in"></select>
-        </div>
-
-        <div>
-            <label>الموقف *</label>
-            <select class="parking_slot">
-                <option value="">— اختر —</option>
-                <option>1</option><option>2</option><option>3</option>
-                <option>4</option><option>5</option><option>6</option>
-            </select>
-        </div>
-    </div>
+<div class="total">الإجمالي: <span class="car_total">0</span> ريال</div>
 
 </div>
 </template>
-
 <!-- مودال الدفع -->
 <div id="paymentModal" class="modal-overlay">
 <div class="modal-box">
@@ -395,10 +463,8 @@
 </div>
 
 <div id="toast-container"></div>
-<!-- سكربت النظام الأساسي -->
-<script src="visit-manager.js"></script>
 
-<!-- سكربت تعدد السيارات -->
+<script src="visit-manager.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -406,19 +472,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const carsContainer = document.getElementById("carsContainer");
     const template = document.getElementById("carCardTemplate");
 
+    /* إضافة سيارة جديدة */
     btnAddCar.onclick = () => {
         const clone = template.content.cloneNode(true);
         const card = clone.querySelector(".car-card");
 
-        card.querySelector(".btn-remove-car").onclick = () => card.remove();
+        /* حذف السيارة */
+        card.querySelector(".btn-remove-car").onclick = () => {
+            card.remove();
+        };
 
+        /* تحميل البيانات */
         loadCarTypesIntoCard(card);
         loadServicesIntoCard(card);
         loadEmployeesIntoCard(card);
+        loadBranchesIntoCard(card);
+
+        /* ربط الدفع */
+        setupPaymentLogic(card);
+
+        /* إضافة خدمة */
+        card.querySelector(".btnAddService").onclick = () => {
+            addServiceToExtraCar(card);
+        };
 
         carsContainer.appendChild(card);
     };
 
+    /* تحميل البراند والموديل */
     function loadCarTypesIntoCard(card) {
         const brandSel = card.querySelector(".car_type");
         const modelSel = card.querySelector(".car_model");
@@ -447,9 +528,13 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
+    /* تحميل الخدمات */
     function loadServicesIntoCard(card) {
         const typeSel = card.querySelector(".service_type");
         const detailSel = card.querySelector(".service_detail");
+        const priceInput = card.querySelector(".price");
+        const pointsInput = card.querySelector(".points");
+        const totalSpan = card.querySelector(".car_total");
 
         typeSel.innerHTML = '<option value="">— اختر —</option>';
         detailSel.innerHTML = '<option value="">— اختر —</option>';
@@ -463,18 +548,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
         typeSel.onchange = () => {
             detailSel.innerHTML = '<option value="">— اختر —</option>';
-            servicesData.filter(s => s.category === typeSel.value).forEach(s => {
-                const opt = document.createElement("option");
-                opt.value = s.service;
-                opt.textContent = s.service;
-                detailSel.appendChild(opt);
-            });
+            servicesData
+                .filter(s => s.category === typeSel.value)
+                .forEach(s => {
+                    const opt = document.createElement("option");
+                    opt.value = s.service;
+                    opt.textContent = s.service;
+                    detailSel.appendChild(opt);
+                });
+        };
+
+        detailSel.onchange = () => {
+            const row = servicesData.find(
+                s => s.category === typeSel.value && s.service === detailSel.value
+            );
+
+            if (row) {
+                priceInput.value = row.price;
+                pointsInput.value = row.points;
+                totalSpan.textContent = row.price;
+                card.dataset.price = row.price;
+            }
         };
     }
 
+    /* تحميل الموظفين */
     function loadEmployeesIntoCard(card) {
         const sel = card.querySelector(".employee_in");
-
         sel.innerHTML = '<option value="">— اختر —</option>';
 
         employeesData.forEach(e => {
@@ -485,8 +585,83 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    /* تحميل الفروع */
+    function loadBranchesIntoCard(card) {
+        const sel = card.querySelector(".branch");
+        sel.innerHTML = '<option value="">— اختر —</option>';
+
+        branchesData.forEach(b => {
+            const opt = document.createElement("option");
+            opt.value = b[0];
+            opt.textContent = b[0];
+            sel.appendChild(opt);
+        });
+    }
+
+    /* منطق الدفع */
+    function setupPaymentLogic(card) {
+        const statusSel = card.querySelector(".payment_status");
+        const methodWrap = card.querySelector(".payment_method_wrapper");
+        const methodSel = card.querySelector(".payment_method");
+        const partialBox = card.querySelector(".partial_payment_box");
+
+        statusSel.onchange = () => {
+            if (statusSel.value === "مدفوع") {
+                methodWrap.style.display = "block";
+            } else {
+                methodWrap.style.display = "none";
+                partialBox.style.display = "none";
+                methodSel.value = "";
+            }
+        };
+
+        methodSel.onchange = () => {
+            if (methodSel.value === "جزئي") {
+                partialBox.style.display = "block";
+            } else {
+                partialBox.style.display = "none";
+            }
+        };
+    }
+
+    /* إضافة خدمة داخل السيارة الإضافية */
+    function addServiceToExtraCar(card) {
+        const list = card.querySelector(".servicesList");
+        const typeSel = card.querySelector(".service_type");
+        const detailSel = card.querySelector(".service_detail");
+
+        if (!typeSel.value || !detailSel.value) {
+            showToast("اختر الخدمة أولاً");
+            return;
+        }
+
+        const row = servicesData.find(
+            s => s.category === typeSel.value && s.service === detailSel.value
+        );
+
+        const div = document.createElement("div");
+        div.className = "service-item";
+        div.innerHTML = `
+            <span>${detailSel.value} — ${row.price} ريال</span>
+            <button class="btn-danger small removeService">✕</button>
+        `;
+
+        div.querySelector(".removeService").onclick = () => {
+            div.remove();
+        };
+
+        list.appendChild(div);
+    }
+
+    /* التوست */
+    function showToast(msg) {
+        const box = document.getElementById("toast-container");
+        const t = document.createElement("div");
+        t.className = "toast";
+        t.textContent = msg;
+        box.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
 });
 </script>
-
-</body>
-</html>
