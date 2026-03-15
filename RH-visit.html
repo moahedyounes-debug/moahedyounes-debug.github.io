@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>رغوة الهجين - إدارة الزيارات</title>
 
-<link rel="stylesheet" href="visit-manager-new.css">
+<link rel="stylesheet" href="visit-manager.css">
 <script src="api.js"></script>
 
 <style>
-/* صفوف الكروت الجديدة */
 .row4 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -29,6 +28,18 @@
     background: #fafafa;
     margin-top: 20px;
 }
+
+.car-card .btn-remove-car {
+    width: auto !important;
+    display: inline-block !important;
+    padding: 6px 12px;
+    background: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    float: left;
+    margin-bottom: 10px;
+}
 </style>
 </head>
 
@@ -36,13 +47,11 @@
 
 <div class="container">
 
-<!-- العنوان -->
 <div class="page-header">
     <h1>رغوة الهجين</h1>
     <h2>إدارة الزيارات</h2>
 </div>
 
-<!-- الملخص -->
 <div class="summary-bar">
     <div class="summary-item">
         <div class="label">الزيارات النشطة</div>
@@ -58,7 +67,6 @@
     </div>
 </div>
 
-<!-- السيارات داخل المغسلة -->
 <div class="section">
     <h3 class="section-title">🚗 سيارات داخل المغسلة (غير مدفوعة)</h3>
     <div id="activeVisitsList" class="cards">
@@ -67,11 +75,12 @@
     <button id="btnRefreshActive" class="btn-secondary full">🔄 تحديث القائمة</button>
 </div>
 
-<!-- النموذج الأساسي (القديم) -->
+<!-- النموذج الأساسي (4 + 4 + 5) -->
 <div id="visitBox" class="section">
     <h3 class="section-title">📝 تسجيل زيارة جديدة</h3>
 
-    <div class="row">
+    <!-- الصف الأول -->
+    <div class="row4">
         <div>
             <label>أرقام اللوحة *</label>
             <input type="text" id="plate_numbers">
@@ -80,9 +89,6 @@
             <label>حروف اللوحة *</label>
             <input type="text" id="plate_letters">
         </div>
-    </div>
-
-    <div class="row">
         <div>
             <label>براند السيارة *</label>
             <select id="car_type"></select>
@@ -93,14 +99,8 @@
         </div>
     </div>
 
-    <div class="row">
-        <div>
-            <label>الحجم</label>
-            <input type="text" id="car_size" readonly>
-        </div>
-    </div>
-
-    <div class="row">
+    <!-- الصف الثاني -->
+    <div class="row4" style="margin-top:15px;">
         <div>
             <label>نوع الخدمة *</label>
             <select id="service_type"></select>
@@ -109,36 +109,10 @@
             <label>تفاصيل الخدمة *</label>
             <select id="service_detail"></select>
         </div>
-    </div>
-
-    <div class="row">
         <div>
-            <label>السعر</label>
-            <input type="number" id="price" readonly>
+            <label>الموظف *</label>
+            <select id="employee_in"></select>
         </div>
-        <div>
-            <label>النقاط</label>
-            <input type="number" id="points" readonly>
-        </div>
-    </div>
-
-    <button id="btnAddService" class="btn-secondary full" onclick="addServiceToList()">➕ إضافة خدمة</button>
-    <div id="servicesList"></div>
-
-    <div class="total">الإجمالي: <span id="totalPrice">0</span> ريال</div>
-
-    <div class="row">
-        <div>
-            <label>الخصم</label>
-            <input type="number" id="discount" value="0" oninput="recalcTotal()">
-        </div>
-        <div>
-            <label>الإكرامية</label>
-            <input type="number" id="tip" value="0">
-        </div>
-    </div>
-
-    <div class="row">
         <div>
             <label>الموقف *</label>
             <select id="parking_slot">
@@ -149,18 +123,8 @@
         </div>
     </div>
 
-    <div class="row">
-        <div>
-            <label>الموظف *</label>
-            <select id="employee_in"></select>
-        </div>
-        <div>
-            <label>الفرع *</label>
-            <select id="branch"></select>
-        </div>
-    </div>
-
-    <div class="row">
+    <!-- الصف الثالث -->
+    <div class="row5" style="margin-top:15px;">
         <div>
             <label>حالة الدفع *</label>
             <select id="payment_status">
@@ -169,6 +133,7 @@
                 <option value="غير مدفوع">غير مدفوع</option>
             </select>
         </div>
+
         <div id="payment_method_wrapper" style="display:none;">
             <label>طريقة الدفع *</label>
             <select id="payment_method">
@@ -178,10 +143,25 @@
                 <option value="جزئي">جزئي</option>
             </select>
         </div>
+
+        <div>
+            <label>الخصم</label>
+            <input type="number" id="discount" value="0" oninput="recalcTotal()">
+        </div>
+
+        <div>
+            <label>الإكرامية</label>
+            <input type="number" id="tip" value="0">
+        </div>
+
+        <div>
+            <label>الحجم</label>
+            <input type="text" id="car_size" readonly>
+        </div>
     </div>
 
-    <div id="partial_payment_box" style="display:none;">
-        <div class="row">
+    <div id="partial_payment_box" style="display:none; margin-top:15px;">
+        <div class="row4">
             <div>
                 <label>الكاش</label>
                 <input type="number" id="cash_amount">
@@ -193,12 +173,13 @@
         </div>
     </div>
 
+    <button id="btnAddService" class="btn-secondary full" onclick="addServiceToList()">➕ إضافة خدمة</button>
+    <div id="servicesList"></div>
+
+    <div class="total">الإجمالي: <span id="totalPrice">0</span> ريال</div>
+
     <button id="btnSubmitVisit" class="btn-primary full" onclick="submitVisit()">💾 تسجيل الزيارة</button>
 </div>
-
-<!-- زر إضافة سيارة جديدة -->
-<button id="btnAddCar" class="btn-secondary full" style="margin-top:25px;">➕ إضافة سيارة أخرى</button>
-
 <!-- الكروت الجديدة -->
 <div id="carsContainer"></div>
 
@@ -206,22 +187,51 @@
 <template id="carCardTemplate">
 <div class="car-card">
 
-    <button class="btn-danger full btn-remove-car">🗑 حذف السيارة</button>
+    <!-- زر حذف السيارة (صغير وعلى اليسار) -->
+    <button class="btn-remove-car">🗑 حذف</button>
 
     <!-- الصف الأول (4 خانات) -->
     <div class="row4" style="margin-top:15px;">
-        <div><label>أرقام اللوحة *</label><input class="plate_numbers"></div>
-        <div><label>حروف اللوحة *</label><input class="plate_letters"></div>
-        <div><label>البراند *</label><select class="car_type"></select></div>
-        <div><label>الموديل *</label><select class="car_model"></select></div>
+        <div>
+            <label>أرقام اللوحة *</label>
+            <input type="text" class="plate_numbers">
+        </div>
+
+        <div>
+            <label>حروف اللوحة *</label>
+            <input type="text" class="plate_letters">
+        </div>
+
+        <div>
+            <label>براند السيارة *</label>
+            <select class="car_type"></select>
+        </div>
+
+        <div>
+            <label>موديل السيارة *</label>
+            <select class="car_model"></select>
+        </div>
     </div>
 
     <!-- الصف الثاني (4 خانات) -->
     <div class="row4" style="margin-top:15px;">
-        <div><label>نوع الخدمة *</label><select class="service_type"></select></div>
-        <div><label>تفاصيل الخدمة *</label><select class="service_detail"></select></div>
-        <div><label>الموظف *</label><select class="employee_in"></select></div>
-        <div><label>الموقف *</label>
+        <div>
+            <label>نوع الخدمة *</label>
+            <select class="service_type"></select>
+        </div>
+
+        <div>
+            <label>تفاصيل الخدمة *</label>
+            <select class="service_detail"></select>
+        </div>
+
+        <div>
+            <label>الموظف *</label>
+            <select class="employee_in"></select>
+        </div>
+
+        <div>
+            <label>الموقف *</label>
             <select class="parking_slot">
                 <option value="">— اختر —</option>
                 <option>1</option><option>2</option><option>3</option>
@@ -251,16 +261,33 @@
             </select>
         </div>
 
-        <div><label>الخصم</label><input type="number" class="discount" value="0"></div>
-        <div><label>الإكرامية</label><input type="number" class="tip" value="0"></div>
-        <div><label>الحجم</label><input class="car_size" readonly></div>
+        <div>
+            <label>الخصم</label>
+            <input type="number" class="discount" value="0">
+        </div>
+
+        <div>
+            <label>الإكرامية</label>
+            <input type="number" class="tip" value="0">
+        </div>
+
+        <div>
+            <label>الحجم</label>
+            <input type="text" class="car_size" readonly>
+        </div>
     </div>
 
     <!-- الدفع الجزئي -->
     <div class="partial_payment_box" style="display:none; margin-top:15px;">
         <div class="row4">
-            <div><label>الكاش</label><input class="cash_amount" value="0"></div>
-            <div><label>الشبكة</label><input class="card_amount" value="0"></div>
+            <div>
+                <label>الكاش</label>
+                <input type="number" class="cash_amount" value="0">
+            </div>
+            <div>
+                <label>الشبكة</label>
+                <input type="number" class="card_amount" value="0">
+            </div>
         </div>
     </div>
 
@@ -270,53 +297,54 @@
 
 </div>
 </template>
-
-</div>
-
-<!-- سكربت النظام القديم -->
-<script src="visit-manager.js"></script>
-
-<!-- سكربت تعدد السيارات -->
 <script>
-/* إضافة سيارة */
+/* عناصر أساسية */
 const carsContainer = document.getElementById("carsContainer");
 const btnAddCar = document.getElementById("btnAddCar");
 const template = document.getElementById("carCardTemplate");
 
+/* إضافة سيارة جديدة */
 btnAddCar.onclick = () => {
     const clone = template.content.cloneNode(true);
     const card = clone.querySelector(".car-card");
 
+    /* زر حذف السيارة */
     card.querySelector(".btn-remove-car").onclick = () => card.remove();
 
+    /* عناصر الدفع */
     const payStatus = card.querySelector(".payment_status");
     const payMethodWrap = card.querySelector(".payment_method_wrapper");
     const partialBox = card.querySelector(".partial_payment_box");
     const payMethod = card.querySelector(".payment_method");
 
+    /* شرط حالة الدفع */
     payStatus.onchange = () => {
-        if (payStatus.value === "مدفوع") payMethodWrap.style.display = "block";
-        else {
+        if (payStatus.value === "مدفوع") {
+            payMethodWrap.style.display = "block";
+        } else {
             payMethodWrap.style.display = "none";
             partialBox.style.display = "none";
             payMethod.value = "";
         }
     };
 
+    /* الدفع الجزئي */
     payMethod.onchange = () => {
         partialBox.style.display = payMethod.value === "جزئي" ? "block" : "none";
     };
 
+    /* تحميل البيانات داخل الكارد */
     loadCarTypesInto(card);
     loadServicesInto(card);
     loadEmployeesInto(card);
 
+    /* إضافة خدمة داخل الكارد */
     card.querySelector(".btnAddService").onclick = () => addServiceToCard(card);
 
     carsContainer.appendChild(card);
 };
 
-/* تحميل البيانات داخل الكروت الجديدة */
+/* تحميل أنواع السيارات داخل الكارد */
 function loadCarTypesInto(card) {
     const brandSel = card.querySelector(".car_type");
     const modelSel = card.querySelector(".car_model");
@@ -351,6 +379,7 @@ function loadCarTypesInto(card) {
     };
 }
 
+/* تحميل الخدمات داخل الكارد */
 function loadServicesInto(card) {
     const typeSel = card.querySelector(".service_type");
     const detailSel = card.querySelector(".service_detail");
@@ -378,9 +407,11 @@ function loadServicesInto(card) {
     };
 }
 
+/* تحميل الموظفين داخل الكارد */
 function loadEmployeesInto(card) {
     const sel = card.querySelector(".employee_in");
     sel.innerHTML = '<option value="">— اختر الموظف —</option>';
+
     employeesData.forEach(e => {
         const opt = document.createElement("option");
         opt.value = e[0];
@@ -389,6 +420,7 @@ function loadEmployeesInto(card) {
     });
 }
 
+/* إضافة خدمة داخل الكارد */
 function addServiceToCard(card) {
     const detailSel = card.querySelector(".service_detail");
     const name = detailSel.value;
@@ -397,18 +429,27 @@ function addServiceToCard(card) {
     if (!name) return alert("اختر خدمة أولاً");
 
     const box = card.querySelector(".servicesList");
+
     const div = document.createElement("div");
     div.className = "service-item";
-    div.innerHTML = `<span>${name} — ${price} ريال</span><button class="btn-remove-service">✕</button>`;
+    div.innerHTML = `
+        <span>${name} — ${price} ريال</span>
+        <button class="btn-remove-service">✕</button>
+    `;
+
     div.querySelector(".btn-remove-service").onclick = () => div.remove();
+
     box.appendChild(div);
 }
 
 /* إرسال كل السيارات */
 document.getElementById("btnSubmitVisit").onclick = async () => {
-    await submitVisit(); // النموذج الأساسي
+    /* أولاً: إرسال النموذج الأساسي */
+    await submitVisit();
 
+    /* ثانياً: إرسال السيارات الإضافية */
     const cards = document.querySelectorAll(".car-card");
+
     for (const card of cards) {
         const data = {
             plate_numbers: card.querySelector(".plate_numbers").value,
@@ -435,6 +476,3 @@ document.getElementById("btnSubmitVisit").onclick = async () => {
     alert("🎉 تم تسجيل جميع الزيارات بنجاح");
 };
 </script>
-
-</body>
-</html>
