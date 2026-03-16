@@ -155,6 +155,31 @@ async function apiAddBooking(data) {
 }
 
 /* ===========================
+   Update Booking Status
+=========================== */
+
+async function apiUpdateBookingStatus(row, status) {
+  return apiPost({
+    action: "updateBookingStatus",
+    row,
+    status
+  });
+}
+
+/* ===========================
+   Update Booking Date & Time
+=========================== */
+
+async function apiUpdateBookingDate(row, date, time) {
+  return apiPost({
+    action: "updateBookingDate",
+    row,
+    date,
+    time
+  });
+}
+
+/* ===========================
    Services / Commissions
 =========================== */
 
@@ -250,28 +275,6 @@ async function apiGetLevels() {
   return apiPost({
     action: "getLevels"
   });
-}
-/* ===========================
-   Update Booking Status
-=========================== */
-async function apiUpdateBookingStatus(phone, status) {
-    return apiPost({
-        action: "updateBookingStatus",
-        phone,
-        status
-    });
-}
-
-/* ===========================
-   Update Booking Date & Time
-=========================== */
-async function apiUpdateBookingDate(phone, date, time) {
-    return apiPost({
-        action: "updateBookingDate",
-        phone,
-        date,
-        time
-    });
 }
 
 /* ===========================
