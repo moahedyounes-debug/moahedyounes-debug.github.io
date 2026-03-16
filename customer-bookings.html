@@ -115,7 +115,7 @@ window.onload = async function(){
 
   box.classList.remove("empty");
 
-box.innerHTML = bookings.map(b => {
+  box.innerHTML = bookings.map(b => {
 
     const service = b[2];
     const date = formatDate(b[3]);
@@ -133,16 +133,6 @@ box.innerHTML = bookings.map(b => {
 
     const time = formatTime(rawTime);
     const status = b[5];
-
-    return `
-      <div class="booking-card">
-        الخدمة: ${service}<br>
-        التاريخ: ${date}<br>
-        الوقت: ${time}<br>
-        الحالة: ${status}
-      </div>
-    `;
-}).join("");
 
     return `
       <div class="booking-card">
