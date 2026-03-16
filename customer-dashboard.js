@@ -1,5 +1,5 @@
 /* =============================
-   تنسيق التاريخ (Excel + نص + ISO)
+   دالة موحدة: اليوم + التاريخ + الوقت
 ============================= */
 function formatDateTime(valueDate, valueTime) {
   let finalDate = "";
@@ -10,7 +10,8 @@ function formatDateTime(valueDate, valueTime) {
      معالجة التاريخ
   ============================== */
   if (valueDate) {
-    if (isNaN(valueDate)) {
+    // تاريخ ISO مثل 2026-03-15
+    if (/^\d{4}-\d{2}-\d{2}$/.test(valueDate)) {
       const d = new Date(valueDate);
       if (!isNaN(d)) {
         finalDay = d.toLocaleDateString("ar-SA", { weekday: "long" });
@@ -19,15 +20,30 @@ function formatDateTime(valueDate, valueTime) {
         const year = d.getFullYear();
         finalDate = `${month}/${day}/${year}`;
       }
-    } else {
+    }
+
+    // تاريخ نص مثل Mar/17/2026
+    else if (isNaN(valueDate)) {
+      const d = new Date(valueDate);
+      if (!isNaN(d)) {
+        finalDay = d.toLocaleDateString("ar-SA", { weekday: "long" });
+        const month = d.toLocaleString("en-US", { month: "short" });
+        const day = String(d.getDate()).padStart(2, "0");
+        const year = d.getFullYear();
+        finalDate = `${month}/${day}/${year}`;
+      }
+    }
+
+    // Excel رقم
+    else {
       const excelDate = Number(valueDate);
-      if (excelDate > 0) {
-        const jsDate = new Date((excelDate - 25569) * 86400 * 1000);
-        if (!isNaN(jsDate)) {
-          finalDay = jsDate.toLocaleDateString("ar-SA", { weekday: "long" });
-          const month = jsDate.toLocaleString("en-US", { month: "short" });
-          const day = String(jsDate.getDate()).padStart(2, "0");
-          const year = jsDate.getFullYear();
+      if (excelDate > 40000 && excelDate < 60000) {
+        const d = new Date((excelDate - 25569) * 86400 * 1000);
+        if (!isNaN(d)) {
+          finalDay = d.toLocaleDateString("ar-SA", { weekday: "long" });
+          const month = d.toLocaleString("en-US", { month: "short" });
+          const day = String(d.getDate()).padStart(2, "0");
+          const year = d.getFullYear();
           finalDate = `${month}/${day}/${year}`;
         }
       }
@@ -38,12 +54,24 @@ function formatDateTime(valueDate, valueTime) {
      معالجة الوقت
   ============================== */
   if (valueTime) {
-    if (typeof valueTime === "string" && valueTime.includes(":")) {
-      finalTime = valueTime.slice(0, 5);
-    } else if (!isNaN(valueTime)) {
-      const excelTime = Number(valueTime);
+    // 12 ساعة مثل 4:30 PM
+    if (valueTime.includes("AM") || valueTime.includes("PM")) {
+      const t = new Date("2000-01-01 " + valueTime);
+      if (!isNaN(t)) {
+        const hh = String(t.getHours()).padStart(2, "0");
+        const mm = String(t.getMinutes()).padStart(2, "0");
+        finalTime = `${hh}:${mm}`;
+      }
+    }
 
-      // تجاهل القيم الغلط مثل -1899 أو 1899
+    // 24 ساعة مثل 14:30
+    else if (/^\d{1,2}:\d{2}/.test(valueTime)) {
+      finalTime = valueTime.slice(0, 5);
+    }
+
+    // Excel رقم
+    else if (!isNaN(valueTime)) {
+      const excelTime = Number(valueTime);
       if (excelTime > 0 && excelTime < 1) {
         const totalMinutes = Math.round(excelTime * 24 * 60);
         const hh = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
@@ -53,12 +81,9 @@ function formatDateTime(valueDate, valueTime) {
     }
   }
 
-  return {
-    day: finalDay,
-    date: finalDate,
-    time: finalTime
-  };
+  return { day: finalDay, date: finalDate, time: finalTime };
 }
+
 /* =============================
    تحميل بيانات العميل
 ============================= */
@@ -114,7 +139,7 @@ function loadCustomerInfoFromLocal() {
 }
 
 /* =============================
-   قراءة مستويات الترقية من الشيت
+   قراءة مستويات الترقية
 ============================= */
 async function loadLevelSystem() {
   const points = Number(CUSTOMER.points || 0);
@@ -215,7 +240,7 @@ async function loadLastVisit() {
       الخدمة: ${last[1]}<br>
       السعر: ${last[2]} ريال<br>
       النقاط: ${last[3]}<br>
-      التاريخ: ${formatDateSmart(last[8])}
+      التاريخ: ${last[8]}
     </div>
   `;
 }
@@ -244,7 +269,6 @@ async function loadBookings(){
 
   const service = last[2];
 
-  // استخدام الدالة الموحدة
   const dt = formatDateTime(last[3], last[4]);
 
   const day  = dt.day;
