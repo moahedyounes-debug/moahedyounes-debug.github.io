@@ -286,13 +286,14 @@ async function loadBranches(){
 }
 
 /* =============================
-   تحميل الأوقات المتاحة
+   تحميل الأوقات المتاحة (محدث)
 ============================= */
-async function loadAvailableTimes(){
+async function loadAvailableTimes() {
   const date = document.getElementById("date").value;
   const timeSelect = document.getElementById("time");
+  const selectedCar = document.getElementById("car").value;
 
-  if(!date){
+  if (!date) {
     timeSelect.innerHTML = `<option value="">اختر الوقت</option>`;
     return;
   }
@@ -301,31 +302,38 @@ async function loadAvailableTimes(){
   const bookings = res.success ? res.bookings : [];
 
   const countByTime = {};
+  const carTimes = {};
+
   bookings.forEach(b => {
-    const t = b.data[4];
-    const status = b.data[5];
-    if(status !== "ملغي"){
+    const data = b.data;
+    const membership = data[1];
+    const t = data[4];
+    const status = data[5];
+
+    if (status !== "ملغي") {
       countByTime[t] = (countByTime[t] || 0) + 1;
+
+      if (membership === selectedCar) {
+        carTimes[t] = true;
+      }
     }
   });
 
   timeSelect.innerHTML = `<option value="">اختر الوقت</option>`;
 
-  for(let h = 10; h <= 23; h++){
-    const hour = h.toString().padStart(2, "0");
-    ["00","30"].forEach(min => {
-      const t = `${hour}:${min}`;
-      if(!countByTime[t] || countByTime[t] < 6){
-        timeSelect.innerHTML += `<option value="${t}">${formatTime(t)}</option>`;
-      }
-    });
+  function addTimeOption(t) {
+    if (carTimes[t]) return;
+    if (countByTime[t] >= 2) return; // الحد = سيارتين فقط
+    timeSelect.innerHTML += `<option value="${t}">${formatTime(t)}</option>`;
   }
 
-  ["00:00","00:30","01:00","01:30","02:00","02:30","03:00"].forEach(t => {
-    if(!countByTime[t] || countByTime[t] < 6){
-      timeSelect.innerHTML += `<option value="${t}">${formatTime(t)}</option>`;
-    }
-  });
+  for (let h = 10; h <= 23; h++) {
+    const hour = h.toString().padStart(2, "0");
+    ["00", "30"].forEach(min => addTimeOption(`${hour}:${min}`));
+  }
+
+  ["00:00","00:30","01:00","01:30","02:00","02:30","03:00"]
+    .forEach(t => addTimeOption(t));
 }
 
 /* =============================
@@ -353,7 +361,7 @@ async function addBooking(){
   const res = await apiPost({
     action: "addBooking",
     phone: String(CUSTOMER.phone),
-    membership: car,   // ← عضوية السيارة المختارة
+    membership: car,
     service,
     date,
     time,
