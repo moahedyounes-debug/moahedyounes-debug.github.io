@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>إنشاء عضوية PassKit</title>
+<title>إنشاء عضوية PassKit فقط</title>
 
 <style>
 body { font-family: Tahoma; padding: 20px; background:#f2f2f2 }
@@ -17,12 +17,12 @@ input { width:100%; padding:10px; margin:10px 0; border-radius:6px; border:1px s
 <body>
 
 <div class="card">
-  <h2>🎫 إنشاء عضوية PassKit</h2>
+  <h2>🎫 إنشاء عضوية PassKit فقط</h2>
 
   <label>رقم الجوال</label>
   <input id="phone" placeholder="05XXXXXXXX">
 
-  <button onclick="createMember()">إنشاء عضوية</button>
+  <button onclick="createMemberOnly()">إنشاء عضوية فقط</button>
 
   <pre id="result">— لا توجد نتائج بعد —</pre>
 </div>
@@ -30,11 +30,11 @@ input { width:100%; padding:10px; margin:10px 0; border-radius:6px; border:1px s
 <script>
 const API = "https://script.google.com/macros/s/AKfycbybiK02cg7ifvNAPuQP9VzRiaKxxGQT5EU6iV2kZcWXvLKtqTBOfx5ObPCDfJAY6bP7SA/exec";
 
-async function createMember() {
+async function createMemberOnly() {
   const phone = document.getElementById("phone").value;
 
   const form = new URLSearchParams();
-  form.append("action", "createPassForCustomerByPhone");
+  form.append("action", "createMemberOnly"); // دالة جديدة نضيفها في GAS
   form.append("phone", phone);
 
   const res = await fetch(API, { method:"POST", body:form });
