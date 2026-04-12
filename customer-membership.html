@@ -81,6 +81,23 @@
 
 <div id="cardContainer"></div>
 
+<!-- أزرار Apple / Google Wallet -->
+<div id="wallet-buttons" style="margin-top: 20px; display: none; text-align: center;">
+  <a id="apple-wallet-btn"
+     class="btn"
+     style="background:black; margin:5px; display:none;"
+     target="_blank">
+     Add to Apple Wallet
+  </a>
+
+  <a id="google-wallet-btn"
+     class="btn"
+     style="background:#1A73E8; margin:5px; display:none;"
+     target="_blank">
+     Add to Google Wallet
+  </a>
+</div>
+
 <button class="btn" onclick="window.location.href='customer-dashboard.html'">العودة للوحة العميل</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -114,6 +131,62 @@ async function refreshCustomer() {
       subscription: c[7]
     };
     localStorage.setItem("customer", JSON.stringify(CUSTOMER));
+  }
+}
+
+/* ============================
+   PassKit — إنشاء بطاقة إن لم تكن موجودة
+============================ */
+
+async function ensurePassExists(phone) {
+  const form = new URLSearchParams();
+  form.append("action", "createPassForCustomerByPhone");
+  form.append("phone", phone);
+
+  await fetch(API_URL, {
+    method: "POST",
+    body: form
+  });
+}
+
+/* ============================
+   PassKit — تحميل روابط البطاقة
+============================ */
+
+async function loadWalletLinks(phone) {
+  const form = new URLSearchParams();
+  form.append("action", "getPassLinksByPhone");
+  form.append("phone", phone);
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: form
+  }).then(r => r.json());
+
+  if (!res.success) {
+    console.log("No wallet links:", res.error);
+    return;
+  }
+
+  const apple = res.appleWallet;
+  const google = res.googleWallet;
+
+  const container = document.getElementById("wallet-buttons");
+  const appleBtn = document.getElementById("apple-wallet-btn");
+  const googleBtn = document.getElementById("google-wallet-btn");
+
+  if (apple) {
+    appleBtn.href = apple;
+    appleBtn.style.display = "inline-block";
+  }
+
+  if (google) {
+    googleBtn.href = google;
+    googleBtn.style.display = "inline-block";
+  }
+
+  if (apple || google) {
+    container.style.display = "block";
   }
 }
 
@@ -168,7 +241,10 @@ function renderCard() {
    تشغيل الصفحة
 ============================ */
 
-refreshCustomer().then(renderCard);
+refreshCustomer()
+  .then(() => ensurePassExists(CUSTOMER.phone))
+  .then(() => loadWalletLinks(CUSTOMER.phone))
+  .then(renderCard);
 
 </script>
 
