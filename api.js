@@ -305,3 +305,21 @@ async function apiAddRow(sheet, values) {
     values: JSON.stringify(values)
   });
 }
+
+/* ===========================
+   PassKit (جديد)
+=========================== */
+
+async function apiCreatePassForCustomerByPhone(phone) {
+  return apiPost({
+    action: "createPassForCustomerByPhone",
+    phone
+  });
+}
+
+async function apiGetPassLinksByPhone(phone) {
+  return apiPost({
+    action: "getPassLinksByPhone",
+    phone
+  });
+}
