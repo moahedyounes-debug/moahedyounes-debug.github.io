@@ -37,6 +37,23 @@
     </button>
   </div>
 
+  <!-- أزرار Apple / Google Wallet -->
+  <div id="wallet-buttons" style="margin-top: 20px; display: none; text-align: center;">
+    <a id="apple-wallet-btn"
+       class="btn"
+       style="background:black; margin:5px; display:none;"
+       target="_blank">
+       Add to Apple Wallet
+    </a>
+
+    <a id="google-wallet-btn"
+       class="btn"
+       style="background:#1A73E8; margin:5px; display:none;"
+       target="_blank">
+       Add to Google Wallet
+    </a>
+  </div>
+
   <!-- سيارات -->
   <div class="section">
     <div class="title">🚗 سياراتك</div>
@@ -72,5 +89,100 @@
 
   <script src="api.js"></script>
   <script src="customer-dashboard.js"></script>
+
+  <script>
+
+  let CUSTOMER = JSON.parse(localStorage.getItem("customer") || "null");
+
+  if(!CUSTOMER){
+    window.location.href = "customer-home.html";
+  }
+
+  /* ============================
+     تحديث بيانات العميل
+  ============================ */
+
+  async function refreshCustomer() {
+    const res = await apiGetCustomerByMembership(CUSTOMER.membership);
+    if (res.success) {
+      const c = res.customer;
+      CUSTOMER = {
+        name: c[0],
+        phone: c[1],
+        membership: c[8],
+        city: c[4],
+        last_visit: c[9],
+        points: c[11],
+        level: c[12],
+        subscription: c[7],
+        freeWash: c[13]
+      };
+      localStorage.setItem("customer", JSON.stringify(CUSTOMER));
+    }
+  }
+
+  /* ============================
+     PassKit — إنشاء بطاقة إن لم تكن موجودة
+  ============================ */
+
+  async function ensurePassExists(phone) {
+    const form = new URLSearchParams();
+    form.append("action", "createPassForCustomerByPhone");
+    form.append("phone", phone);
+
+    await fetch(API_URL, {
+      method: "POST",
+      body: form
+    });
+  }
+
+  /* ============================
+     PassKit — تحميل روابط البطاقة
+  ============================ */
+
+  async function loadWalletLinks(phone) {
+    const form = new URLSearchParams();
+    form.append("action", "getPassLinksByPhone");
+    form.append("phone", phone);
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: form
+    }).then(r => r.json());
+
+    if (!res.success) return;
+
+    const apple = res.appleWallet;
+    const google = res.googleWallet;
+
+    const container = document.getElementById("wallet-buttons");
+    const appleBtn = document.getElementById("apple-wallet-btn");
+    const googleBtn = document.getElementById("google-wallet-btn");
+
+    if (apple) {
+      appleBtn.href = apple;
+      appleBtn.style.display = "inline-block";
+    }
+
+    if (google) {
+      googleBtn.href = google;
+      googleBtn.style.display = "inline-block";
+    }
+
+    if (apple || google) {
+      container.style.display = "block";
+    }
+  }
+
+  /* ============================
+     تشغيل الصفحة
+  ============================ */
+
+  refreshCustomer()
+    .then(() => ensurePassExists(CUSTOMER.phone))
+    .then(() => loadWalletLinks(CUSTOMER.phone));
+
+  </script>
+
 </body>
 </html>
