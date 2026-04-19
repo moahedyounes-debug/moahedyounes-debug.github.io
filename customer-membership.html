@@ -2,113 +2,618 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>بطاقة العضوية</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <title>بطاقة العضوية — رغوة الهجين</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0D47A1">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
-    body{
-      font-family:"Tajawal",sans-serif;
-      background:#F4FAFF;
-      color:#0D47A1;
-      padding:20px;
-      text-align:center;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Tajawal", sans-serif;
+      background: #F4FAFF;
+      color: #0D47A1;
+      min-height: 100vh;
+      padding-bottom: 30px;
     }
 
-    .card{
-      width:330px;
-      margin:auto;
-      border-radius:18px;
-      overflow:hidden;
-      background:white;
-      box-shadow:0 6px 18px rgba(0,0,0,0.15);
-      position:relative;
+    /* ── Header ───────────────── */
+    .page-header {
+      background: #0D47A1;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .page-header img { width: 80px; }
+    .page-header h2 { color: white; font-size: 18px; font-weight: 700; }
+    .back-btn {
+      color: rgba(255,255,255,.8);
+      font-size: 13px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .top{
-      padding:14px;
-      color:white;
-      font-size:20px;
-      font-weight:700;
-      text-align:center;
+    /* ── Container ─────────────── */
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px 16px;
     }
 
-    .content{
-      padding:20px;
-      position:relative;
-      z-index:2;
+    /* ── Loading ───────────────── */
+    #loadingState {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #E3F2FD;
+      border-top-color: #0D47A1;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── LOYALTY CARD ──────────── */
+    .card-scene {
+      perspective: 1000px;
+      margin-bottom: 8px;
     }
 
-    .row{
-      display:flex;
-      justify-content:space-between;
-      margin-bottom:10px;
-      font-size:15px;
+    .loyalty-card {
+      width: 100%;
+      max-width: 360px;
+      height: 210px;
+      margin: 0 auto;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform .6s ease;
+      cursor: pointer;
+      border-radius: 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.25);
+    }
+    .loyalty-card.flipped { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      backface-visibility: hidden;
+      overflow: hidden;
     }
 
-    .label{ color:#4FC3F7; }
-    .value{ color:#0D47A1; font-weight:600; }
-
-    .qr{
-      width:130px;
-      height:130px;
-      margin:14px auto;
-      border-radius:10px;
-      overflow:hidden;
-      background:#E3F2FD;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:2px dashed #4FC3F7;
+    /* FRONT */
+    .card-front {
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-front::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg, transparent, transparent 20px,
+        rgba(255,255,255,.04) 20px, rgba(255,255,255,.04) 21px
+      );
+    }
+    .card-front::after {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.12), transparent 70%);
     }
 
-    .btn{
-      margin-top:20px;
-      padding:12px;
-      width:100%;
-      border:none;
-      border-radius:999px;
-      background:#0D47A1;
-      color:white;
-      font-size:15px;
-      cursor:pointer;
+    .card-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative; z-index: 1;
     }
+    .card-brand {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,.9);
+    }
+    .card-level-tag {
+      padding: 3px 12px;
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      color: rgba(0,0,0,.8);
+      background: rgba(255,255,255,.85);
+    }
+
+    .card-chip {
+      position: relative; z-index: 1;
+      width: 38px; height: 28px;
+      border-radius: 5px;
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 2px; padding: 3px;
+      background: linear-gradient(135deg, rgba(255,255,255,.3), rgba(255,255,255,.1));
+      box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    }
+    .card-chip span { background: rgba(0,0,0,.25); border-radius: 1px; }
+
+    .card-bottom-row {
+      position: relative; z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .card-lbl {
+      font-size: 9px;
+      color: rgba(255,255,255,.5);
+      letter-spacing: 1.5px;
+      margin-bottom: 3px;
+    }
+    .card-holder-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: rgba(255,255,255,.95);
+      letter-spacing: .5px;
+    }
+    .card-points-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: rgba(255,255,255,.95);
+      line-height: 1;
+      text-align: left;
+    }
+    .card-points-unit {
+      font-size: 10px;
+      color: rgba(255,255,255,.5);
+      text-align: left;
+    }
+
+    /* BACK */
+    .card-back {
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #0d0d18;
+    }
+    .card-back::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 12px,
+        rgba(255,255,255,.03) 12px, rgba(255,255,255,.03) 13px
+      );
+    }
+    .qr-wrap {
+      position: relative; z-index: 1;
+      background: white;
+      padding: 8px;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    }
+    .card-back-sub {
+      position: relative; z-index: 1;
+      font-size: 10px;
+      color: rgba(255,255,255,.35);
+      letter-spacing: 1px;
+    }
+    .card-mem-num {
+      position: relative; z-index: 1;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,.5);
+      font-family: monospace;
+      letter-spacing: 2px;
+    }
+
+    .flip-hint {
+      text-align: center;
+      font-size: 11px;
+      color: #90CAF9;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    /* ── WALLET BUTTONS ─────────── */
+    #wallet-buttons {
+      display: none;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #wallet-buttons.show { display: flex; }
+
+    .wallet-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-family: "Tajawal", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .wallet-btn:hover { transform: translateY(-2px); }
+    #apple-wallet-btn {
+      background: #000;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0,0,0,.3);
+    }
+    #google-wallet-btn {
+      background: #fff;
+      color: #1a1a1a;
+      box-shadow: 0 4px 14px rgba(0,0,0,.15);
+      border: 1px solid #e0e0e0;
+    }
+
+    /* ── INFO CARDS ─────────────── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .info-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.07);
+      border: 1px solid #E3F2FD;
+      position: relative;
+      overflow: hidden;
+    }
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--card-accent, #0D47A1);
+    }
+    .info-card-icon { font-size: 20px; margin-bottom: 6px; }
+    .info-card-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--card-color, #0D47A1);
+      margin-bottom: 2px;
+    }
+    .info-card-lbl { font-size: 11px; color: #90CAF9; }
+
+    /* ── SECTION ────────────────── */
+    .section {
+      background: white;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.07);
+      border: 1px solid #E3F2FD;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #0D47A1;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #E3F2FD;
+    }
+
+    /* ── PROGRESS ───────────────── */
+    .progress-bar {
+      height: 8px;
+      background: #E3F2FD;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1565C0, #4FC3F7);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 1s ease;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #90CAF9;
+    }
+
+    /* Level badges */
+    .level-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .level-chip {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1.5px solid;
+      opacity: .4;
+    }
+    .level-chip.done { opacity: 1; }
+
+    /* ── DATA ROWS ──────────────── */
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #F0F7FF;
+      font-size: 14px;
+    }
+    .data-row:last-child { border-bottom: none; }
+    .data-lbl { color: #4FC3F7; }
+    .data-val { font-weight: 600; color: #0D47A1; }
+
+    /* ── VISIT ITEMS ─────────────── */
+    .visit-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #F0F7FF;
+    }
+    .visit-item:last-child { border-bottom: none; }
+    .visit-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: #E3F2FD;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .visit-info { flex: 1; }
+    .visit-service { font-size: 13px; font-weight: 700; }
+    .visit-date { font-size: 11px; color: #90CAF9; margin-top: 2px; }
+    .visit-pts {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0D47A1;
+      white-space: nowrap;
+    }
+
+    /* ── BUTTON ─────────────────── */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: #0D47A1;
+      color: white;
+      font-family: "Tajawal", sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: opacity .2s;
+    }
+    .btn:hover { opacity: .9; }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #0D47A1;
+      color: #0D47A1;
+    }
+
+    /* ── ERROR ──────────────────── */
+    #errorState {
+      text-align: center;
+      padding: 60px 20px;
+      display: none;
+    }
+    .error-icon { font-size: 48px; margin-bottom: 12px; }
+    .error-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .error-msg { font-size: 14px; color: #4FC3F7; margin-bottom: 20px; }
+
+    /* ── FREE WASH BADGE ────────── */
+    .free-wash-badge {
+      background: #E8F5E9;
+      border: 1px solid #A5D6A7;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .free-wash-badge-icon { font-size: 22px; }
+    .free-wash-badge-text { font-size: 13px; font-weight: 600; color: #2E7D32; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp .4s ease both; }
+    .d1 { animation-delay: .05s; }
+    .d2 { animation-delay: .1s; }
+    .d3 { animation-delay: .15s; }
+    .d4 { animation-delay: .2s; }
   </style>
 </head>
-
 <body>
 
-<h2>بطاقة العضوية</h2>
-
-<div id="cardContainer"></div>
-
-<!-- أزرار Apple / Google Wallet -->
-<div id="wallet-buttons" style="margin-top: 20px; display: none; text-align: center;">
-  <a id="apple-wallet-btn"
-     class="btn"
-     style="background:black; margin:5px; display:none;"
-     target="_blank">
-     Add to Apple Wallet
-  </a>
-
-  <a id="google-wallet-btn"
-     class="btn"
-     style="background:#1A73E8; margin:5px; display:none;"
-     target="_blank">
-     Add to Google Wallet
-  </a>
+<!-- HEADER -->
+<div class="page-header">
+  <a href="customer-dashboard.html" class="back-btn">← رجوع</a>
+  <h2>بطاقة العضوية</h2>
+  <img src="logo.png" alt="RH" onerror="this.style.display='none'">
 </div>
 
-<button class="btn" onclick="window.location.href='customer-dashboard.html'">العودة للوحة العميل</button>
+<div class="container">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <!-- LOADING -->
+  <div id="loadingState">
+    <div class="spinner"></div>
+    <div style="color:#90CAF9;font-size:13px">جاري تحميل بطاقتك...</div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="errorState">
+    <div class="error-icon">🔒</div>
+    <div class="error-title">غير مسجل الدخول</div>
+    <div class="error-msg">يرجى تسجيل الدخول للوصول لبطاقتك</div>
+    <button class="btn" onclick="window.location.href='customer-home.html'">تسجيل الدخول</button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="mainContent" style="display:none">
+
+    <!-- CARD -->
+    <div class="card-scene fade-up">
+      <div class="loyalty-card" id="loyaltyCard" onclick="this.classList.toggle('flipped')" title="اضغط للقلب">
+        <!-- FRONT -->
+        <div class="card-face card-front" id="cardFront">
+          <div class="card-top-row">
+            <div class="card-brand">RAGWAT AL-HAJEEN</div>
+            <div class="card-level-tag" id="cardLevelTag">—</div>
+          </div>
+          <div class="card-chip">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+          <div class="card-bottom-row">
+            <div>
+              <div class="card-lbl">CARD HOLDER</div>
+              <div class="card-holder-name" id="cardName">—</div>
+            </div>
+            <div>
+              <div class="card-lbl">POINTS</div>
+              <div class="card-points-val" id="cardPoints">0</div>
+              <div class="card-points-unit">نقطة</div>
+            </div>
+          </div>
+        </div>
+        <!-- BACK -->
+        <div class="card-face card-back">
+          <div class="qr-wrap"><canvas id="qrCanvas"></canvas></div>
+          <div class="card-mem-num" id="cardMemNum">—</div>
+          <div class="card-back-sub">امسح للتحقق من البطاقة</div>
+        </div>
+      </div>
+    </div>
+    <div class="flip-hint">↩ اضغط على البطاقة لرؤية رمز QR</div>
+
+    <!-- WALLET BUTTONS -->
+    <div id="wallet-buttons" style="display:none;gap:10px;margin-bottom:20px">
+      <a id="apple-wallet-btn"  class="wallet-btn" style="background:#000;color:#fff;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:12px;text-decoration:none;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700" target="_blank">
+        🍎 Apple Wallet
+      </a>
+      <a id="google-wallet-btn" class="wallet-btn" style="background:#fff;color:#1a1a1a;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:12px;text-decoration:none;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;border:1px solid #e0e0e0" target="_blank">
+        🟡 Google Wallet
+      </a>
+    </div>
+
+    <!-- FREE WASH -->
+    <div class="free-wash-badge" id="freeWashBadge" style="display:none">
+      <div class="free-wash-badge-icon">🎁</div>
+      <div class="free-wash-badge-text">لديك غسيل مجاني متاح! تواصل مع الفرع للاستفادة.</div>
+    </div>
+
+    <!-- INFO GRID -->
+    <div class="info-grid fade-up d1">
+      <div class="info-card" style="--card-accent:#0D47A1;--card-color:#0D47A1">
+        <div class="info-card-icon">⭐</div>
+        <div class="info-card-val" id="infoPoints">0</div>
+        <div class="info-card-lbl">النقاط الحالية</div>
+      </div>
+      <div class="info-card" style="--card-accent:#FF8F00;--card-color:#E65100">
+        <div class="info-card-icon" id="infoLevelIcon">🥉</div>
+        <div class="info-card-val" id="infoLevel">—</div>
+        <div class="info-card-lbl">مستواي</div>
+      </div>
+      <div class="info-card" style="--card-accent:#2E7D32;--card-color:#2E7D32">
+        <div class="info-card-icon">🚗</div>
+        <div class="info-card-val" id="infoVisits">0</div>
+        <div class="info-card-lbl">إجمالي الزيارات</div>
+      </div>
+      <div class="info-card" style="--card-accent:#1565C0;--card-color:#1565C0">
+        <div class="info-card-icon">📅</div>
+        <div class="info-card-val" id="infoLastVisit" style="font-size:13px">—</div>
+        <div class="info-card-lbl">آخر زيارة</div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="section fade-up d2">
+      <div class="section-title">📈 تقدم المستوى</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-labels">
+        <span id="progressCurrent">0 نقطة</span>
+        <span id="progressNext">—</span>
+      </div>
+      <div class="level-row" id="levelRow"></div>
+    </div>
+
+    <!-- CUSTOMER DATA -->
+    <div class="section fade-up d3">
+      <div class="section-title">👤 بيانات العضوية</div>
+      <div class="data-row"><span class="data-lbl">الاسم</span><span class="data-val" id="dataName">—</span></div>
+      <div class="data-row"><span class="data-lbl">رقم الجوال</span><span class="data-val" id="dataPhone">—</span></div>
+      <div class="data-row"><span class="data-lbl">رقم العضوية</span><span class="data-val" id="dataMembership">—</span></div>
+      <div class="data-row"><span class="data-lbl">الاشتراك</span><span class="data-val" id="dataSubscription">—</span></div>
+      <div class="data-row"><span class="data-lbl">المدينة</span><span class="data-val" id="dataCity">—</span></div>
+    </div>
+
+    <!-- RECENT VISITS -->
+    <div class="section fade-up d4">
+      <div class="section-title">🧽 آخر الزيارات</div>
+      <div id="visitsBox">
+        <div style="text-align:center;color:#90CAF9;padding:20px;font-size:13px">جاري التحميل...</div>
+      </div>
+      <button class="btn btn-outline" onclick="window.location.href='customer-visits-full.html'" style="margin-top:10px">
+        عرض كل الزيارات
+      </button>
+    </div>
+
+    <!-- BACK BUTTON -->
+    <button class="btn" onclick="window.location.href='customer-dashboard.html'">
+      ← العودة للوحة العميل
+    </button>
+
+  </div>
+</div>
+
 <script src="api.js"></script>
-
 <script>
-
-/* ============================
-   قراءة العضوية من الرابط (مرحلة 7)
-============================ */
-
+/* ================================================
+   STATE
+================================================ */
 const urlParams = new URLSearchParams(window.location.search);
 const membershipFromQR = urlParams.get("m");
 
@@ -119,146 +624,249 @@ if (membershipFromQR) {
   localStorage.setItem("customer", JSON.stringify(CUSTOMER));
 }
 
-// لو ما فيه بيانات عميل → رجوع
-if(!CUSTOMER){
-  window.location.href = "customer-home.html";
+if (!CUSTOMER || (!CUSTOMER.membership && !CUSTOMER.phone)) {
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("errorState").style.display = "block";
 }
 
-/* ============================
-   تحديث بيانات العميل من الـ API
-============================ */
+/* ================================================
+   LEVEL COLORS
+================================================ */
+const LEVEL_STYLES = {
+  Bronze:   { gradient: "linear-gradient(135deg,#4a2000,#cd7f32,#6b3800)", color: "#cd7f32", icon: "🥉", ar: "برونزي" },
+  Silver:   { gradient: "linear-gradient(135deg,#2a2a2a,#a8a9ad,#555)", color: "#a8a9ad", icon: "🥈", ar: "فضي" },
+  Gold:     { gradient: "linear-gradient(135deg,#4a3800,#d4af37,#6b5200)", color: "#d4af37", icon: "🥇", ar: "ذهبي" },
+  Platinum: { gradient: "linear-gradient(135deg,#1a1a1a,#e5e4e2,#444)", color: "#e5e4e2", icon: "💎", ar: "بلاتيني" },
+  VIP:      { gradient: "linear-gradient(135deg,#0d001a,#4a0080,#0d001a)", color: "#c084fc", icon: "👑", ar: "VIP" },
+};
 
-async function refreshCustomer() {
-  const res = await apiGetCustomerByMembership(CUSTOMER.membership);
-  if (res.success) {
-    const c = res.customer;
-    CUSTOMER = {
-      name: c[0],
-      phone: c[1],
-      membership: c[8],
-      city: c[4],
-      last_visit: c[9],
-      points: c[11],
-      level: c[12],
-      subscription: c[7]
-    };
+function getLevelStyle(level) {
+  return LEVEL_STYLES[level] || LEVEL_STYLES.Bronze;
+}
+
+/* ================================================
+   BOOT
+================================================ */
+async function boot() {
+  if (!CUSTOMER || !CUSTOMER.membership) return;
+
+  try {
+    // 1. جلب بيانات العميل
+    const res = await apiGetCustomerByMembership(CUSTOMER.membership);
+    if (!res.success) {
+      showError("العميل غير موجود", res.error || "");
+      return;
+    }
+
+    const c = parseCustomer(res.customer);
+    CUSTOMER = { ...CUSTOMER, ...c };
     localStorage.setItem("customer", JSON.stringify(CUSTOMER));
+
+    // 2. رسم البطاقة والبيانات
+    renderCard(c);
+    renderData(c);
+
+    // 3. جلب مستويات النقاط
+    loadLevelProgress(c);
+
+    // 4. جلب الزيارات
+    loadRecentVisits(c.membership);
+
+    // 5. بطاقة Wallet
+    if (c.phone) {
+      apiCreatePassForCustomerByPhone(c.phone).catch(() => {});
+      loadWalletLinks(c.phone);
+    }
+
+  } catch (e) {
+    console.error(e);
+    showError("خطأ في الاتصال", "تعذر الاتصال بالخادم، حاول مرة أخرى");
   }
 }
 
-/* ============================
-   PassKit — إنشاء بطاقة إن لم تكن موجودة
-============================ */
+if (CUSTOMER && CUSTOMER.membership) boot();
 
-async function ensurePassExists(phone) {
-  const form = new URLSearchParams();
-  form.append("action", "createPassForCustomerByPhone");
-  form.append("phone", phone);
+/* ================================================
+   RENDER CARD
+================================================ */
+function renderCard(c) {
+  const style = getLevelStyle(c.level);
+  const lvlAr = style.ar;
 
-  await fetch(API_URL, {
-    method: "POST",
-    body: form
+  // تطبيق الـ gradient على وجه البطاقة
+  document.getElementById("cardFront").style.background = style.gradient;
+  document.getElementById("cardLevelTag").textContent = `${style.icon} ${lvlAr}`;
+  document.getElementById("cardName").textContent = c.name.split(" ").slice(0,2).join(" ");
+  document.getElementById("cardPoints").textContent = c.points.toLocaleString("ar-SA");
+  document.getElementById("cardMemNum").textContent = c.membership;
+
+  // QR Code
+  const qrVal = `https://moahedyounes-debug.github.io/RH/customer-membership.html?m=${c.membership}`;
+  new QRious({
+    element: document.getElementById("qrCanvas"),
+    value: qrVal,
+    size: 110,
+    level: "H",
+    background: "#ffffff",
+    foreground: "#000000"
   });
+
+  // غسيل مجاني
+  if (c.free_wash > 0) {
+    document.getElementById("freeWashBadge").style.display = "flex";
+  }
+
+  // إظهار المحتوى
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("mainContent").style.display = "block";
 }
 
-/* ============================
-   PassKit — تحميل روابط البطاقة
-============================ */
+/* ================================================
+   RENDER DATA
+================================================ */
+function renderData(c) {
+  document.getElementById("infoPoints").textContent    = c.points.toLocaleString("ar-SA");
+  document.getElementById("infoLevelIcon").textContent = getLevelStyle(c.level).icon;
+  document.getElementById("infoLevel").textContent     = getLevelStyle(c.level).ar;
+  document.getElementById("infoVisits").textContent    = c.visit_count;
+  document.getElementById("infoLastVisit").textContent = c.last_visit !== "—" ? c.last_visit : "لا يوجد";
 
-async function loadWalletLinks(phone) {
-  const form = new URLSearchParams();
-  form.append("action", "getPassLinksByPhone");
-  form.append("phone", phone);
+  document.getElementById("dataName").textContent         = c.name;
+  document.getElementById("dataPhone").textContent        = c.phone;
+  document.getElementById("dataMembership").textContent   = c.membership;
+  document.getElementById("dataSubscription").textContent = c.subscription;
+  document.getElementById("dataCity").textContent         = c.city || "—";
+}
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    body: form
-  }).then(r => r.json());
+/* ================================================
+   LEVEL PROGRESS — من شيت Level الفعلي
+================================================ */
+async function loadLevelProgress(c) {
+  const points = c.points;
 
-  if (!res.success) {
-    console.log("No wallet links:", res.error);
+  const res = await apiGetLevels();
+
+  let levels = [];
+  if (res.success && res.levels && res.levels.length) {
+    levels = res.levels.map(r => ({
+      level: r[0],
+      from:  Number(r[1]),
+      to:    r[2] === "" || r[2] === null ? null : Number(r[2])
+    }));
+  } else {
+    // fallback إذا ما رد الـ API
+    levels = [
+      { level: "Bronze",   from: 0,    to: 499  },
+      { level: "Silver",   from: 500,  to: 1499 },
+      { level: "Gold",     from: 1500, to: 3999 },
+      { level: "Platinum", from: 4000, to: 7999 },
+      { level: "VIP",      from: 8000, to: null },
+    ];
+  }
+
+  const current = levels.find(l => {
+    if (l.to === null) return points >= l.from;
+    return points >= l.from && points <= l.to;
+  });
+
+  if (!current) return;
+
+  let pct = 0, nextText = "";
+  if (current.to === null) {
+    pct = 100;
+    nextText = "أعلى مستوى 🎉";
+  } else {
+    const range = current.to - current.from;
+    pct = Math.min(100, Math.max(0, ((points - current.from) / range) * 100));
+    const remaining = current.to - points + 1;
+    const nextLevel = levels.find(l => l.from > current.from);
+    const nextAr = nextLevel ? (getLevelStyle(nextLevel.level).ar || nextLevel.level) : "";
+    nextText = `${remaining} نقطة للـ ${nextAr}`;
+  }
+
+  setTimeout(() => {
+    document.getElementById("progressFill").style.width = pct + "%";
+  }, 400);
+
+  document.getElementById("progressCurrent").textContent = points.toLocaleString("ar-SA") + " نقطة";
+  document.getElementById("progressNext").textContent = nextText;
+
+  // Level badges
+  const levelRow = document.getElementById("levelRow");
+  const curIdx = levels.findIndex(l => l.level === current.level);
+  levelRow.innerHTML = levels.map((l, i) => {
+    const s = getLevelStyle(l.level);
+    const done = i <= curIdx;
+    return `<div class="level-chip ${done ? 'done' : ''}" style="border-color:${s.color};color:${s.color}">${s.icon} ${s.ar || l.level}</div>`;
+  }).join("");
+}
+
+/* ================================================
+   RECENT VISITS
+================================================ */
+async function loadRecentVisits(membership) {
+  const box = document.getElementById("visitsBox");
+  const res = await apiGetVisitsByMembership(membership);
+
+  if (!res.success || !res.visits || !res.visits.length) {
+    box.innerHTML = `<div style="text-align:center;color:#90CAF9;padding:20px;font-size:13px">لا توجد زيارات سابقة</div>`;
     return;
   }
 
-  const apple = res.appleWallet;
-  const google = res.googleWallet;
+  // الزيارات بترتيب عكسي (الأحدث أولاً)، آخر 5
+  const visits = res.visits.map(v => v.data || v).reverse().slice(0, 5);
 
+  box.innerHTML = visits.map(row => {
+    const v = parseVisit(row);
+    const dt = formatCheckIn(v.check_in);
+    return `
+      <div class="visit-item">
+        <div class="visit-icon">🚗</div>
+        <div class="visit-info">
+          <div class="visit-service">${v.service || "غسيل"}</div>
+          <div class="visit-date">${dt.date} ${dt.time ? "· " + dt.time : ""} ${v.branch ? "· " + v.branch : ""}</div>
+        </div>
+        <div class="visit-pts">+${v.points} نقطة<br><span style="font-size:11px;color:#90CAF9;font-weight:400">${v.price ? v.price + " ر" : ""}</span></div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ================================================
+   WALLET LINKS
+================================================ */
+async function loadWalletLinks(phone) {
+  const res = await apiGetPassLinksByPhone(phone);
+  if (!res.success) return;
+
+  const apple  = res.appleWallet;
+  const google = res.googleWallet;
   const container = document.getElementById("wallet-buttons");
-  const appleBtn = document.getElementById("apple-wallet-btn");
+  const appleBtn  = document.getElementById("apple-wallet-btn");
   const googleBtn = document.getElementById("google-wallet-btn");
 
   if (apple) {
     appleBtn.href = apple;
-    appleBtn.style.display = "inline-block";
+    appleBtn.style.display = "flex";
   }
-
   if (google) {
     googleBtn.href = google;
-    googleBtn.style.display = "inline-block";
+    googleBtn.style.display = "flex";
   }
-
   if (apple || google) {
-    container.style.display = "block";
+    container.style.display = "flex";
   }
 }
 
-/* ============================
-   رسم البطاقة
-============================ */
-
-function renderCard() {
-
-  // ألوان المستويات
-  let color = "#cd7f32"; // Bronze
-  if (CUSTOMER.level === "Silver") color = "#c0c0c0";
-  if (CUSTOMER.level === "Gold") color = "#d4af37";
-  if (CUSTOMER.level === "Platinum") color = "#e5e4e2";
-  if (CUSTOMER.level === "VIP") color = "#000";
-
-  document.getElementById("cardContainer").innerHTML = `
-    <div class="card">
-      <div class="top" style="background:${color};">
-        بطاقة الولاء
-      </div>
-
-      <div class="content">
-        <div class="row"><span class="label">الاسم</span><span class="value">${CUSTOMER.name}</span></div>
-        <div class="row"><span class="label">رقم الجوال</span><span class="value">${CUSTOMER.phone}</span></div>
-        <div class="row"><span class="label">رقم العضوية</span><span class="value">${CUSTOMER.membership}</span></div>
-        <div class="row"><span class="label">المستوى</span><span class="value">${CUSTOMER.level}</span></div>
-        <div class="row"><span class="label">النقاط</span><span class="value">${CUSTOMER.points}</span></div>
-
-        <div class="qr">
-          <canvas id="qrCanvas" width="130" height="130"></canvas>
-        </div>
-
-        <div class="row"><span class="label">الاشتراك</span><span class="value">${CUSTOMER.subscription || "بدون اشتراك"}</span></div>
-        <div class="row"><span class="label">آخر زيارة</span><span class="value">${CUSTOMER.last_visit || "—"}</span></div>
-      </div>
-    </div>
-  `;
-
-  // QR = رابط مباشر (مرحلة 7)
-  let qrValue = `https://moahedyounes-debug.github.io/RH/customer-membership.html?m=${CUSTOMER.membership}`;
-
-  new QRious({
-    element: document.getElementById("qrCanvas"),
-    value: qrValue,
-    size: 130,
-    level: "H"
-  });
+/* ================================================
+   ERROR
+================================================ */
+function showError(title, msg) {
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("errorState").style.display = "block";
+  document.querySelector("#errorState .error-title").textContent = title;
+  document.querySelector("#errorState .error-msg").textContent   = msg;
 }
-
-/* ============================
-   تشغيل الصفحة
-============================ */
-
-refreshCustomer()
-  .then(() => ensurePassExists(CUSTOMER.phone))
-  .then(() => loadWalletLinks(CUSTOMER.phone))
-  .then(renderCard);
-
 </script>
-
 </body>
 </html>
