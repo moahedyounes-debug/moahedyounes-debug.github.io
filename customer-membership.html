@@ -1,871 +1,593 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>بطاقة العضوية — رغوة الهجين</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#0D47A1">
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<title>بطاقة الولاء — رغوة الهجين</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#080C14">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-    body {
-      font-family: "Tajawal", sans-serif;
-      background: #F4FAFF;
-      color: #0D47A1;
-      min-height: 100vh;
-      padding-bottom: 30px;
-    }
+:root{
+  --bg:#080C14;
+  --surface:#0F1420;
+  --card:#151B28;
+  --border:#1E2640;
+  --text:#E8ECF4;
+  --muted:#5A6380;
+  --bronze-from:#3D1A00; --bronze-to:#CD7F32; --bronze:#CD7F32;
+  --silver-from:#1A1A2E; --silver-to:#A8A9AD; --silver:#A8A9AD;
+  --gold-from:#2D1F00;   --gold-to:#D4AF37;   --gold:#D4AF37;
+  --plat-from:#0A0A14;   --plat-to:#E5E4E2;   --plat:#E5E4E2;
+  --vip-from:#14001F;    --vip-to:#9B59B6;    --vip:#9B59B6;
+}
 
-    /* ── Header ───────────────── */
-    .page-header {
-      background: #0D47A1;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .page-header img { width: 80px; }
-    .page-header h2 { color: white; font-size: 18px; font-weight: 700; }
-    .back-btn {
-      color: rgba(255,255,255,.8);
-      font-size: 13px;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+body{
+  font-family:'Tajawal',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
 
-    /* ── Container ─────────────── */
-    .container {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 20px 16px;
-    }
+/* animated BG */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 40% at 30% 0%,rgba(212,175,55,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 100%,rgba(74,0,128,.08) 0%,transparent 50%);
+}
 
-    /* ── Loading ───────────────── */
-    #loadingState {
-      text-align: center;
-      padding: 60px 20px;
-    }
-    .spinner {
-      width: 36px; height: 36px;
-      border: 3px solid #E3F2FD;
-      border-top-color: #0D47A1;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      margin: 0 auto 12px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+/* ── HEADER ── */
+.hdr{
+  position:sticky;top:0;z-index:50;
+  background:rgba(8,12,20,.9);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:14px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.hdr-logo{width:52px;height:52px;border-radius:12px;overflow:hidden;background:var(--card)}
+.hdr-logo img{width:100%;height:100%;object-fit:cover}
+.hdr-title{font-size:16px;font-weight:800;letter-spacing:.5px}
+.hdr-back{
+  color:var(--muted);font-size:13px;text-decoration:none;
+  display:flex;align-items:center;gap:5px;
+  padding:7px 14px;border-radius:10px;
+  border:1px solid var(--border);transition:.2s;
+}
+.hdr-back:hover{border-color:var(--gold);color:var(--gold)}
 
-    /* ── LOYALTY CARD ──────────── */
-    .card-scene {
-      perspective: 1000px;
-      margin-bottom: 8px;
-    }
+/* ── WRAP ── */
+.wrap{position:relative;z-index:1;max-width:430px;margin:0 auto;padding:22px 16px 100px}
 
-    .loyalty-card {
-      width: 100%;
-      max-width: 360px;
-      height: 210px;
-      margin: 0 auto;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform .6s ease;
-      cursor: pointer;
-      border-radius: 20px;
-      box-shadow: 0 12px 40px rgba(0,0,0,.25);
-    }
-    .loyalty-card.flipped { transform: rotateY(180deg); }
+/* ── LOADING ── */
+.loading{text-align:center;padding:80px 0}
+.spin{
+  width:38px;height:38px;border-radius:50%;
+  border:3px solid var(--border);border-top-color:var(--gold);
+  animation:spin .7s linear infinite;margin:0 auto 14px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-    .card-face {
-      position: absolute;
-      inset: 0;
-      border-radius: 20px;
-      backface-visibility: hidden;
-      overflow: hidden;
-    }
+/* ── LOYALTY CARD ── */
+.card-scene{perspective:1100px;margin-bottom:8px}
+.loyalty-card{
+  width:100%;max-width:380px;height:220px;
+  margin:0 auto;position:relative;
+  transform-style:preserve-3d;
+  transition:transform .65s cubic-bezier(.4,0,.2,1);
+  cursor:pointer;border-radius:22px;
+  box-shadow:0 24px 60px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);
+}
+.loyalty-card.flipped{transform:rotateY(180deg)}
 
-    /* FRONT */
-    .card-front {
-      padding: 22px 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .card-front::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        45deg, transparent, transparent 20px,
-        rgba(255,255,255,.04) 20px, rgba(255,255,255,.04) 21px
-      );
-    }
-    .card-front::after {
-      content: '';
-      position: absolute;
-      top: -40px; right: -40px;
-      width: 180px; height: 180px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,255,255,.12), transparent 70%);
-    }
+.card-face{
+  position:absolute;inset:0;border-radius:22px;
+  backface-visibility:hidden;overflow:hidden;
+}
 
-    .card-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      position: relative; z-index: 1;
-    }
-    .card-brand {
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,.9);
-    }
-    .card-level-tag {
-      padding: 3px 12px;
-      border-radius: 30px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .5px;
-      color: rgba(0,0,0,.8);
-      background: rgba(255,255,255,.85);
-    }
+/* FRONT */
+.card-front{
+  padding:22px 24px;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+/* subtle grid texture */
+.card-front::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 22px,rgba(255,255,255,.025) 22px,rgba(255,255,255,.025) 23px);
+}
+/* glow top-right */
+.card-front::after{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.1),transparent 70%);
+}
 
-    .card-chip {
-      position: relative; z-index: 1;
-      width: 38px; height: 28px;
-      border-radius: 5px;
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 2px; padding: 3px;
-      background: linear-gradient(135deg, rgba(255,255,255,.3), rgba(255,255,255,.1));
-      box-shadow: 0 2px 6px rgba(0,0,0,.2);
-    }
-    .card-chip span { background: rgba(0,0,0,.25); border-radius: 1px; }
+.cf-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
+.cf-brand{font-size:13px;font-weight:900;letter-spacing:4px;color:rgba(255,255,255,.85)}
+.cf-tier{
+  padding:4px 12px;border-radius:30px;
+  font-size:10px;font-weight:800;letter-spacing:1px;
+  color:rgba(0,0,0,.85);background:rgba(255,255,255,.88);
+}
 
-    .card-bottom-row {
-      position: relative; z-index: 1;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
-    .card-lbl {
-      font-size: 9px;
-      color: rgba(255,255,255,.5);
-      letter-spacing: 1.5px;
-      margin-bottom: 3px;
-    }
-    .card-holder-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: rgba(255,255,255,.95);
-      letter-spacing: .5px;
-    }
-    .card-points-val {
-      font-size: 24px;
-      font-weight: 800;
-      color: rgba(255,255,255,.95);
-      line-height: 1;
-      text-align: left;
-    }
-    .card-points-unit {
-      font-size: 10px;
-      color: rgba(255,255,255,.5);
-      text-align: left;
-    }
+/* CAR SVG ICON */
+.cf-car{
+  position:relative;z-index:1;
+  width:90px;height:38px;
+  margin:2px 0;
+  filter:drop-shadow(0 3px 8px rgba(0,0,0,.4));
+  transition:filter .5s;
+}
 
-    /* BACK */
-    .card-back {
-      transform: rotateY(180deg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      background: #0d0d18;
-    }
-    .card-back::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 12px,
-        rgba(255,255,255,.03) 12px, rgba(255,255,255,.03) 13px
-      );
-    }
-    .qr-wrap {
-      position: relative; z-index: 1;
-      background: white;
-      padding: 8px;
-      border-radius: 10px;
-      box-shadow: 0 4px 16px rgba(0,0,0,.4);
-    }
-    .card-back-sub {
-      position: relative; z-index: 1;
-      font-size: 10px;
-      color: rgba(255,255,255,.35);
-      letter-spacing: 1px;
-    }
-    .card-mem-num {
-      position: relative; z-index: 1;
-      font-size: 12px;
-      font-weight: 600;
-      color: rgba(255,255,255,.5);
-      font-family: monospace;
-      letter-spacing: 2px;
-    }
+.cf-bottom{display:flex;justify-content:space-between;align-items:flex-end;position:relative;z-index:1}
+.cf-lbl{font-size:8px;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:3px}
+.cf-name{font-size:14px;font-weight:700;color:rgba(255,255,255,.95);letter-spacing:.5px}
+.cf-pts-val{font-size:26px;font-weight:900;color:rgba(255,255,255,.95);line-height:1;text-align:left}
+.cf-pts-unit{font-size:10px;color:rgba(255,255,255,.45);text-align:left}
 
-    .flip-hint {
-      text-align: center;
-      font-size: 11px;
-      color: #90CAF9;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
+/* BACK */
+.card-back{
+  transform:rotateY(180deg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  background:#07090F;
+}
+.card-back::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 12px,rgba(255,255,255,.025) 12px,rgba(255,255,255,.026) 13px);
+}
+.qr-wrap{position:relative;z-index:1;background:#fff;padding:9px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.card-back-mem{position:relative;z-index:1;font-size:11px;font-weight:700;color:rgba(255,255,255,.45);font-family:monospace;letter-spacing:3px}
+.card-back-sub{position:relative;z-index:1;font-size:10px;color:rgba(255,255,255,.25);letter-spacing:1px}
 
-    /* ── WALLET BUTTONS ─────────── */
-    #wallet-buttons {
-      display: none;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    #wallet-buttons.show { display: flex; }
+.flip-hint{text-align:center;font-size:11px;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:5px}
 
-    .wallet-btn {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
-      font-family: "Tajawal", sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      transition: transform .2s, box-shadow .2s;
-    }
-    .wallet-btn:hover { transform: translateY(-2px); }
-    #apple-wallet-btn {
-      background: #000;
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(0,0,0,.3);
-    }
-    #google-wallet-btn {
-      background: #fff;
-      color: #1a1a1a;
-      box-shadow: 0 4px 14px rgba(0,0,0,.15);
-      border: 1px solid #e0e0e0;
-    }
+/* ── WALLET BUTTONS ── */
+.wallet-row{display:flex;gap:10px;margin-bottom:22px}
+.wallet-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px;border-radius:14px;border:none;
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;
+  text-decoration:none;cursor:pointer;transition:all .2s;
+}
+.wallet-btn:hover{transform:translateY(-2px)}
+.w-apple{background:#000;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.4);border:1px solid #222}
+.w-google{background:#fff;color:#111;box-shadow:0 4px 14px rgba(0,0,0,.2)}
 
-    /* ── INFO CARDS ─────────────── */
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
+/* ── SECTION ── */
+.sec{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;padding:20px;margin-bottom:14px;
+  animation:fadeUp .4s ease both;
+}
+.sec-title{
+  font-size:14px;font-weight:800;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;color:var(--text);
+}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
 
-    .info-card {
-      background: white;
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.07);
-      border: 1px solid #E3F2FD;
-      position: relative;
-      overflow: hidden;
-    }
-    .info-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--card-accent, #0D47A1);
-    }
-    .info-card-icon { font-size: 20px; margin-bottom: 6px; }
-    .info-card-val {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--card-color, #0D47A1);
-      margin-bottom: 2px;
-    }
-    .info-card-lbl { font-size: 11px; color: #90CAF9; }
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 
-    /* ── SECTION ────────────────── */
-    .section {
-      background: white;
-      border-radius: 18px;
-      padding: 18px;
-      margin-bottom: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.07);
-      border: 1px solid #E3F2FD;
-    }
-    .section-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #0D47A1;
-    }
-    .section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: #E3F2FD;
-    }
+/* ── STATS GRID ── */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:14px 12px;
+  position:relative;overflow:hidden;
+}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--stat-clr,var(--gold))}
+.stat-icon{font-size:18px;margin-bottom:6px}
+.stat-val{font-size:20px;font-weight:900;color:var(--stat-clr,var(--gold))}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px}
 
-    /* ── PROGRESS ───────────────── */
-    .progress-bar {
-      height: 8px;
-      background: #E3F2FD;
-      border-radius: 99px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #1565C0, #4FC3F7);
-      border-radius: 99px;
-      width: 0%;
-      transition: width 1s ease;
-    }
-    .progress-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: #90CAF9;
-    }
+/* ── PROGRESS ── */
+.prog-bar{height:7px;background:var(--border);border-radius:99px;overflow:hidden;margin:10px 0 7px}
+.prog-fill{
+  height:100%;border-radius:99px;width:0%;
+  background:linear-gradient(90deg,var(--fill-a,#5c3a00),var(--fill-b,var(--gold)));
+  transition:width 1.1s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.prog-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+  animation:shimmer 2s infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
-    /* Level badges */
-    .level-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-    .level-chip {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      border: 1.5px solid;
-      opacity: .4;
-    }
-    .level-chip.done { opacity: 1; }
+.prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
 
-    /* ── DATA ROWS ──────────────── */
-    .data-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #F0F7FF;
-      font-size: 14px;
-    }
-    .data-row:last-child { border-bottom: none; }
-    .data-lbl { color: #4FC3F7; }
-    .data-val { font-weight: 600; color: #0D47A1; }
+/* level badges */
+.lvl-row{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.lvl-chip{
+  padding:4px 11px;border-radius:20px;
+  font-size:10px;font-weight:800;border:1.5px solid;
+  opacity:.3;transition:opacity .3s;
+}
+.lvl-chip.active{opacity:1}
 
-    /* ── VISIT ITEMS ─────────────── */
-    .visit-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid #F0F7FF;
-    }
-    .visit-item:last-child { border-bottom: none; }
-    .visit-icon {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      background: #E3F2FD;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-    .visit-info { flex: 1; }
-    .visit-service { font-size: 13px; font-weight: 700; }
-    .visit-date { font-size: 11px; color: #90CAF9; margin-top: 2px; }
-    .visit-pts {
-      font-size: 13px;
-      font-weight: 700;
-      color: #0D47A1;
-      white-space: nowrap;
-    }
+/* ── DATA ROWS ── */
+.d-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid rgba(30,38,64,.6);
+  font-size:13px;
+}
+.d-row:last-child{border-bottom:none}
+.d-lbl{color:var(--muted)}
+.d-val{font-weight:700;color:var(--text)}
 
-    /* ── BUTTON ─────────────────── */
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 12px;
-      background: #0D47A1;
-      color: white;
-      font-family: "Tajawal", sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: opacity .2s;
-    }
-    .btn:hover { opacity: .9; }
-    .btn-outline {
-      background: transparent;
-      border: 2px solid #0D47A1;
-      color: #0D47A1;
-    }
+/* ── VISITS ── */
+.visit-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid rgba(30,38,64,.5)}
+.visit-item:last-child{border-bottom:none}
+.v-icon{width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.v-info{flex:1}
+.v-svc{font-size:13px;font-weight:700}
+.v-date{font-size:11px;color:var(--muted);margin-top:1px}
+.v-pts{font-size:14px;font-weight:900;color:var(--gold);white-space:nowrap}
 
-    /* ── ERROR ──────────────────── */
-    #errorState {
-      text-align: center;
-      padding: 60px 20px;
-      display: none;
-    }
-    .error-icon { font-size: 48px; margin-bottom: 12px; }
-    .error-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-    .error-msg { font-size: 14px; color: #4FC3F7; margin-bottom: 20px; }
+/* ── BOTTOM NAV ── */
+.bnav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;
+  background:rgba(8,12,20,.95);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;padding:8px 16px 18px;gap:4px;z-index:50;
+}
+.bnav a{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  text-decoration:none;color:var(--muted);font-size:9px;
+  padding:7px 4px;border-radius:10px;transition:.2s;
+}
+.bnav a:hover,.bnav a.on{color:var(--gold);background:rgba(212,175,55,.08)}
+.bnav-icon{font-size:20px}
 
-    /* ── FREE WASH BADGE ────────── */
-    .free-wash-badge {
-      background: #E8F5E9;
-      border: 1px solid #A5D6A7;
-      border-radius: 10px;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .free-wash-badge-icon { font-size: 22px; }
-    .free-wash-badge-text { font-size: 13px; font-weight: 600; color: #2E7D32; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp .4s ease both; }
-    .d1 { animation-delay: .05s; }
-    .d2 { animation-delay: .1s; }
-    .d3 { animation-delay: .15s; }
-    .d4 { animation-delay: .2s; }
-  </style>
+/* free wash badge */
+.fw-badge{
+  background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);
+  border-radius:12px;padding:12px 16px;
+  display:flex;align-items:center;gap:12px;margin-bottom:14px;
+}
+.fw-icon{font-size:24px}
+.fw-text{font-size:13px;font-weight:700;color:#2ecc71}
+</style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="page-header">
-  <a href="customer-dashboard.html" class="back-btn">← رجوع</a>
-  <h2>بطاقة العضوية</h2>
-  <img src="logo.png" alt="RH" onerror="this.style.display='none'">
-</div>
+<header class="hdr">
+  <a href="customer-dashboard.html" class="hdr-back">← رجوع</a>
+  <div class="hdr-title">بطاقة الولاء</div>
+  <div class="hdr-logo"><img src="logo.png" alt="RH" onerror="this.style.display='none'"></div>
+</header>
 
-<div class="container">
+<div class="wrap">
 
   <!-- LOADING -->
-  <div id="loadingState">
-    <div class="spinner"></div>
-    <div style="color:#90CAF9;font-size:13px">جاري تحميل بطاقتك...</div>
+  <div id="loadingState" class="loading">
+    <div class="spin"></div>
+    <div style="color:var(--muted);font-size:13px">جاري تحميل بطاقتك...</div>
   </div>
 
-  <!-- ERROR -->
-  <div id="errorState">
-    <div class="error-icon">🔒</div>
-    <div class="error-title">غير مسجل الدخول</div>
-    <div class="error-msg">يرجى تسجيل الدخول للوصول لبطاقتك</div>
-    <button class="btn" onclick="window.location.href='customer-home.html'">تسجيل الدخول</button>
-  </div>
+  <!-- CONTENT -->
+  <div id="content" style="display:none">
 
-  <!-- MAIN CONTENT -->
-  <div id="mainContent" style="display:none">
-
-    <!-- CARD -->
-    <div class="card-scene fade-up">
-      <div class="loyalty-card" id="loyaltyCard" onclick="this.classList.toggle('flipped')" title="اضغط للقلب">
+    <!-- LOYALTY CARD -->
+    <div class="card-scene">
+      <div class="loyalty-card" id="lcard" onclick="this.classList.toggle('flipped')" title="اضغط للقلب">
         <!-- FRONT -->
         <div class="card-face card-front" id="cardFront">
-          <div class="card-top-row">
-            <div class="card-brand">RAGWAT AL-HAJEEN</div>
-            <div class="card-level-tag" id="cardLevelTag">—</div>
+          <div class="cf-top">
+            <div class="cf-brand">RAGHWAT AL‑HAJEEN</div>
+            <div class="cf-tier" id="cfTier">—</div>
           </div>
-          <div class="card-chip">
-            <span></span><span></span><span></span>
-            <span></span><span></span><span></span>
-            <span></span><span></span><span></span>
-          </div>
-          <div class="card-bottom-row">
+
+          <!-- SVG CAR — يتلون حسب المستوى -->
+          <svg class="cf-car" id="carSvg" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="carGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop id="g1" offset="0%" stop-color="#CD7F32"/>
+                <stop id="g2" offset="100%" stop-color="#8B4000"/>
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- body -->
+            <rect x="10" y="35" width="180" height="30" rx="8" fill="url(#carGrad)" filter="url(#glow)"/>
+            <!-- roof -->
+            <path d="M45 35 Q55 12 90 10 L130 10 Q160 12 165 35 Z" fill="url(#carGrad)"/>
+            <!-- windshield -->
+            <path d="M55 34 Q63 18 90 16 L120 16 Q145 18 152 34 Z" fill="rgba(255,255,255,0.18)"/>
+            <!-- side windows -->
+            <rect x="57" y="17" width="27" height="16" rx="3" fill="rgba(255,255,255,0.14)"/>
+            <rect x="93" y="17" width="27" height="16" rx="3" fill="rgba(255,255,255,0.14)"/>
+            <!-- wheels -->
+            <circle cx="50" cy="65" r="13" fill="#1a1a2e"/>
+            <circle cx="50" cy="65" r="8" fill="#2a2a3e"/>
+            <circle cx="50" cy="65" r="4" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="150" cy="65" r="13" fill="#1a1a2e"/>
+            <circle cx="150" cy="65" r="8" fill="#2a2a3e"/>
+            <circle cx="150" cy="65" r="4" fill="rgba(255,255,255,0.4)"/>
+            <!-- headlights -->
+            <ellipse cx="185" cy="48" rx="7" ry="5" fill="rgba(255,255,180,0.7)"/>
+            <ellipse cx="15" cy="48" rx="7" ry="5" fill="rgba(255,100,80,0.6)"/>
+            <!-- wash bubbles (animated) -->
+            <circle class="bubble" cx="100" cy="20" r="3" fill="rgba(255,255,255,0.5)" opacity="0">
+              <animate attributeName="cy" values="20;5;20" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0;0.6;0" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle class="bubble" cx="80" cy="25" r="2" fill="rgba(255,255,255,0.4)" opacity="0">
+              <animate attributeName="cy" values="25;8;25" dur="2.4s" begin="0.5s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0;0.5;0" dur="2.4s" begin="0.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle class="bubble" cx="120" cy="22" r="2.5" fill="rgba(255,255,255,0.45)" opacity="0">
+              <animate attributeName="cy" values="22;6;22" dur="1.8s" begin="1s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0;0.55;0" dur="1.8s" begin="1s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+
+          <div class="cf-bottom">
             <div>
-              <div class="card-lbl">CARD HOLDER</div>
-              <div class="card-holder-name" id="cardName">—</div>
+              <div class="cf-lbl">CARD HOLDER</div>
+              <div class="cf-name" id="cfName">—</div>
             </div>
             <div>
-              <div class="card-lbl">POINTS</div>
-              <div class="card-points-val" id="cardPoints">0</div>
-              <div class="card-points-unit">نقطة</div>
+              <div class="cf-lbl">POINTS</div>
+              <div class="cf-pts-val" id="cfPts">0</div>
+              <div class="cf-pts-unit">نقطة</div>
             </div>
           </div>
         </div>
         <!-- BACK -->
         <div class="card-face card-back">
           <div class="qr-wrap"><canvas id="qrCanvas"></canvas></div>
-          <div class="card-mem-num" id="cardMemNum">—</div>
+          <div class="card-back-mem" id="cbMem">—</div>
           <div class="card-back-sub">امسح للتحقق من البطاقة</div>
         </div>
       </div>
     </div>
-    <div class="flip-hint">↩ اضغط على البطاقة لرؤية رمز QR</div>
+    <div class="flip-hint">↩ اضغط البطاقة لرؤية QR</div>
 
     <!-- WALLET BUTTONS -->
-    <div id="wallet-buttons" style="display:none;gap:10px;margin-bottom:20px">
-      <a id="apple-wallet-btn"  class="wallet-btn" style="background:#000;color:#fff;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:12px;text-decoration:none;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700" target="_blank">
-        🍎 Apple Wallet
+    <div class="wallet-row" id="walletRow" style="display:none">
+      <a id="appleBtn" class="wallet-btn w-apple" href="#" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 405.6 1 287.8 1 170.2c0-98.4 36.3-150.6 107.5-150.6 58.3 0 96.3 38.1 137.7 38.1 40.2 0 80.3-40.8 145.1-40.8 57.3 0 100.2 22.7 135.8 68.4l0 0c15.2-75.2 63.7-145.1 136.8-145.1 58.3 0 121.4 38.3 139.4 118.3z"/></svg>
+        Apple Wallet
       </a>
-      <a id="google-wallet-btn" class="wallet-btn" style="background:#fff;color:#1a1a1a;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:12px;text-decoration:none;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;border:1px solid #e0e0e0" target="_blank">
-        🟡 Google Wallet
+      <a id="googleBtn" class="wallet-btn w-google" href="#" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4CAF50" d="M45 1s-9 2-13 6L8 31l9 9 28-24c4-4 2-15 2-15z"/><path fill="#1E88E5" d="M3 35l8 8 7-7-9-9z"/><path fill="#E53935" d="M45 1L24 22l-5 5 9 9 17-18c4-5 4-17 0-17z"/><path fill="#FDD835" d="M3 35l7-7 3 3-3 3z"/></svg>
+        Google Wallet
       </a>
     </div>
 
     <!-- FREE WASH -->
-    <div class="free-wash-badge" id="freeWashBadge" style="display:none">
-      <div class="free-wash-badge-icon">🎁</div>
-      <div class="free-wash-badge-text">لديك غسيل مجاني متاح! تواصل مع الفرع للاستفادة.</div>
+    <div class="fw-badge" id="fwBadge" style="display:none">
+      <div class="fw-icon">🎁</div>
+      <div class="fw-text">لديك غسيل مجاني! تواصل مع أقرب فرع.</div>
     </div>
 
-    <!-- INFO GRID -->
-    <div class="info-grid fade-up d1">
-      <div class="info-card" style="--card-accent:#0D47A1;--card-color:#0D47A1">
-        <div class="info-card-icon">⭐</div>
-        <div class="info-card-val" id="infoPoints">0</div>
-        <div class="info-card-lbl">النقاط الحالية</div>
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat" style="--stat-clr:var(--gold)">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-val" id="sPoints">0</div>
+        <div class="stat-lbl">نقاطي</div>
       </div>
-      <div class="info-card" style="--card-accent:#FF8F00;--card-color:#E65100">
-        <div class="info-card-icon" id="infoLevelIcon">🥉</div>
-        <div class="info-card-val" id="infoLevel">—</div>
-        <div class="info-card-lbl">مستواي</div>
+      <div class="stat" style="--stat-clr:#E67E22">
+        <div class="stat-icon" id="sLvlIcon">🥉</div>
+        <div class="stat-val" id="sLvl">—</div>
+        <div class="stat-lbl">مستواي</div>
       </div>
-      <div class="info-card" style="--card-accent:#2E7D32;--card-color:#2E7D32">
-        <div class="info-card-icon">🚗</div>
-        <div class="info-card-val" id="infoVisits">0</div>
-        <div class="info-card-lbl">إجمالي الزيارات</div>
+      <div class="stat" style="--stat-clr:#2ecc71">
+        <div class="stat-icon">🚗</div>
+        <div class="stat-val" id="sVisits">0</div>
+        <div class="stat-lbl">زياراتي</div>
       </div>
-      <div class="info-card" style="--card-accent:#1565C0;--card-color:#1565C0">
-        <div class="info-card-icon">📅</div>
-        <div class="info-card-val" id="infoLastVisit" style="font-size:13px">—</div>
-        <div class="info-card-lbl">آخر زيارة</div>
+      <div class="stat" style="--stat-clr:#3498db">
+        <div class="stat-icon">📅</div>
+        <div class="stat-val" id="sLast" style="font-size:13px">—</div>
+        <div class="stat-lbl">آخر زيارة</div>
       </div>
     </div>
 
     <!-- PROGRESS -->
-    <div class="section fade-up d2">
-      <div class="section-title">📈 تقدم المستوى</div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
+    <div class="sec" style="animation-delay:.1s">
+      <div class="sec-title">📈 تقدم المستوى</div>
+      <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+      <div class="prog-labels">
+        <span id="pCurr">0 نقطة</span>
+        <span id="pNext">—</span>
       </div>
-      <div class="progress-labels">
-        <span id="progressCurrent">0 نقطة</span>
-        <span id="progressNext">—</span>
-      </div>
-      <div class="level-row" id="levelRow"></div>
+      <div class="lvl-row" id="lvlRow"></div>
     </div>
 
-    <!-- CUSTOMER DATA -->
-    <div class="section fade-up d3">
-      <div class="section-title">👤 بيانات العضوية</div>
-      <div class="data-row"><span class="data-lbl">الاسم</span><span class="data-val" id="dataName">—</span></div>
-      <div class="data-row"><span class="data-lbl">رقم الجوال</span><span class="data-val" id="dataPhone">—</span></div>
-      <div class="data-row"><span class="data-lbl">رقم العضوية</span><span class="data-val" id="dataMembership">—</span></div>
-      <div class="data-row"><span class="data-lbl">الاشتراك</span><span class="data-val" id="dataSubscription">—</span></div>
-      <div class="data-row"><span class="data-lbl">المدينة</span><span class="data-val" id="dataCity">—</span></div>
+    <!-- MEMBER DATA -->
+    <div class="sec" style="animation-delay:.15s">
+      <div class="sec-title">👤 بيانات العضوية</div>
+      <div class="d-row"><span class="d-lbl">الاسم</span><span class="d-val" id="dName">—</span></div>
+      <div class="d-row"><span class="d-lbl">الجوال</span><span class="d-val" id="dPhone">—</span></div>
+      <div class="d-row"><span class="d-lbl">رقم العضوية</span><span class="d-val" id="dMem">—</span></div>
+      <div class="d-row"><span class="d-lbl">الاشتراك</span><span class="d-val" id="dSub">—</span></div>
+      <div class="d-row"><span class="d-lbl">الفرع</span><span class="d-val" id="dCity">—</span></div>
     </div>
 
-    <!-- RECENT VISITS -->
-    <div class="section fade-up d4">
-      <div class="section-title">🧽 آخر الزيارات</div>
-      <div id="visitsBox">
-        <div style="text-align:center;color:#90CAF9;padding:20px;font-size:13px">جاري التحميل...</div>
-      </div>
-      <button class="btn btn-outline" onclick="window.location.href='customer-visits-full.html'" style="margin-top:10px">
-        عرض كل الزيارات
-      </button>
+    <!-- VISITS -->
+    <div class="sec" style="animation-delay:.2s">
+      <div class="sec-title">🧽 آخر الزيارات</div>
+      <div id="visitsBox"><div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">جاري التحميل...</div></div>
+      <a href="customer-visits-full.html" style="display:block;text-align:center;margin-top:14px;font-size:12px;color:var(--gold);text-decoration:none">عرض كل الزيارات ←</a>
     </div>
 
-    <!-- BACK BUTTON -->
-    <button class="btn" onclick="window.location.href='customer-dashboard.html'">
-      ← العودة للوحة العميل
-    </button>
-
+    <a href="customer-dashboard.html" style="display:block;text-align:center;padding:13px;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);font-weight:700;font-size:14px">← العودة للوحة العميل</a>
   </div>
 </div>
 
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <a href="customer-dashboard.html"><span class="bnav-icon">🏠</span>الرئيسية</a>
+  <a href="customer-membership.html" class="on"><span class="bnav-icon">🃏</span>بطاقتي</a>
+  <a href="customer-booking.html"><span class="bnav-icon">📅</span>حجز</a>
+  <a href="customer-visits-full.html"><span class="bnav-icon">📋</span>زياراتي</a>
+  <a href="customer-cars.html"><span class="bnav-icon">🚗</span>سياراتي</a>
+</nav>
+
 <script src="api.js"></script>
 <script>
-/* ================================================
-   STATE
-================================================ */
-const urlParams = new URLSearchParams(window.location.search);
-const membershipFromQR = urlParams.get("m");
-
-let CUSTOMER = JSON.parse(localStorage.getItem("customer") || "null");
-
-if (membershipFromQR) {
-  CUSTOMER = { membership: membershipFromQR };
-  localStorage.setItem("customer", JSON.stringify(CUSTOMER));
-}
-
-if (!CUSTOMER || (!CUSTOMER.membership && !CUSTOMER.phone)) {
-  document.getElementById("loadingState").style.display = "none";
-  document.getElementById("errorState").style.display = "block";
-}
-
-/* ================================================
-   LEVEL COLORS
-================================================ */
-const LEVEL_STYLES = {
-  Bronze:   { gradient: "linear-gradient(135deg,#4a2000,#cd7f32,#6b3800)", color: "#cd7f32", icon: "🥉", ar: "برونزي" },
-  Silver:   { gradient: "linear-gradient(135deg,#2a2a2a,#a8a9ad,#555)", color: "#a8a9ad", icon: "🥈", ar: "فضي" },
-  Gold:     { gradient: "linear-gradient(135deg,#4a3800,#d4af37,#6b5200)", color: "#d4af37", icon: "🥇", ar: "ذهبي" },
-  Platinum: { gradient: "linear-gradient(135deg,#1a1a1a,#e5e4e2,#444)", color: "#e5e4e2", icon: "💎", ar: "بلاتيني" },
-  VIP:      { gradient: "linear-gradient(135deg,#0d001a,#4a0080,#0d001a)", color: "#c084fc", icon: "👑", ar: "VIP" },
+/* ── LEVEL CONFIG ── */
+const LEVELS = {
+  Bronze:   {ar:'برونزي', icon:'🥉', color:'#CD7F32', from:'#3D1A00', to:'#CD7F32', card:'linear-gradient(135deg,#3D1A00 0%,#6B3500 40%,#3D1A00 100%)'},
+  Silver:   {ar:'فضي',    icon:'🥈', color:'#A8A9AD', from:'#1A1A2E', to:'#A8A9AD', card:'linear-gradient(135deg,#1A1A2E 0%,#4A4A5A 40%,#1A1A2E 100%)'},
+  Gold:     {ar:'ذهبي',   icon:'🥇', color:'#D4AF37', from:'#2D1F00', to:'#D4AF37', card:'linear-gradient(135deg,#2D1F00 0%,#6B5200 40%,#2D1F00 100%)'},
+  Platinum: {ar:'بلاتيني',icon:'💎', color:'#E5E4E2', from:'#0A0A14', to:'#E5E4E2', card:'linear-gradient(135deg,#0A0A14 0%,#3A3A4A 40%,#0A0A14 100%)'},
+  VIP:      {ar:'VIP',    icon:'👑', color:'#9B59B6', from:'#14001F', to:'#9B59B6', card:'linear-gradient(135deg,#14001F 0%,#4A0080 40%,#14001F 100%)'},
 };
+const LVL_ORDER = ['Bronze','Silver','Gold','Platinum','VIP'];
 
-function getLevelStyle(level) {
-  return LEVEL_STYLES[level] || LEVEL_STYLES.Bronze;
-}
+function getLvl(name){ return LEVELS[name] || LEVELS.Bronze; }
 
-/* ================================================
-   BOOT
-================================================ */
-async function boot() {
-  if (!CUSTOMER || !CUSTOMER.membership) return;
+/* ── STATE ── */
+const usp = new URLSearchParams(location.search);
+const memFromQR = usp.get('m');
+let C = JSON.parse(localStorage.getItem('customer') || 'null');
+if(memFromQR){ C = {membership: memFromQR}; localStorage.setItem('customer', JSON.stringify(C)); }
+if(!C || !C.membership){ location.href = 'customer-home.html'; }
 
-  try {
-    // 1. جلب بيانات العميل
-    const res = await apiGetCustomerByMembership(CUSTOMER.membership);
-    if (!res.success) {
-      showError("العميل غير موجود", res.error || "");
-      return;
-    }
-
+/* ── BOOT ── */
+async function boot(){
+  try{
+    const res = await apiGetCustomerByMembership(C.membership);
+    if(!res.success){ showErr('العميل غير موجود'); return; }
     const c = parseCustomer(res.customer);
-    CUSTOMER = { ...CUSTOMER, ...c };
-    localStorage.setItem("customer", JSON.stringify(CUSTOMER));
+    C = {...C, ...c};
+    localStorage.setItem('customer', JSON.stringify(C));
 
-    // 2. رسم البطاقة والبيانات
     renderCard(c);
-    renderData(c);
-
-    // 3. جلب مستويات النقاط
-    loadLevelProgress(c);
-
-    // 4. جلب الزيارات
-    loadRecentVisits(c.membership);
-
-    // 5. بطاقة Wallet
-    if (c.phone) {
-      apiCreatePassForCustomerByPhone(c.phone).catch(() => {});
-      loadWalletLinks(c.phone);
-    }
-
-  } catch (e) {
-    console.error(e);
-    showError("خطأ في الاتصال", "تعذر الاتصال بالخادم، حاول مرة أخرى");
-  }
+    renderStats(c);
+    loadProgress(c);
+    loadVisits(c.membership);
+    if(c.phone){ loadWallet(c.phone); apiCreatePassForCustomerByPhone(c.phone).catch(()=>{}); }
+  }catch(e){ console.error(e); showErr('خطأ في الاتصال'); }
 }
 
-if (CUSTOMER && CUSTOMER.membership) boot();
+boot();
 
-/* ================================================
-   RENDER CARD
-================================================ */
-function renderCard(c) {
-  const style = getLevelStyle(c.level);
-  const lvlAr = style.ar;
+/* ── RENDER CARD ── */
+function renderCard(c){
+  const lvl = getLvl(c.level);
 
-  // تطبيق الـ gradient على وجه البطاقة
-  document.getElementById("cardFront").style.background = style.gradient;
-  document.getElementById("cardLevelTag").textContent = `${style.icon} ${lvlAr}`;
-  document.getElementById("cardName").textContent = c.name.split(" ").slice(0,2).join(" ");
-  document.getElementById("cardPoints").textContent = c.points.toLocaleString("ar-SA");
-  document.getElementById("cardMemNum").textContent = c.membership;
+  // gradients on card
+  document.getElementById('cardFront').style.background = lvl.card;
+  document.getElementById('cfTier').textContent = lvl.icon + ' ' + lvl.ar;
+  document.getElementById('cfName').textContent = c.name.split(' ').slice(0,2).join(' ');
+  document.getElementById('cfPts').textContent  = c.points.toLocaleString('ar-SA');
+  document.getElementById('cbMem').textContent  = c.membership;
 
-  // QR Code
+  // color the car SVG
+  document.getElementById('g1').setAttribute('stop-color', lvl.from.replace('#','') ? lvl.from : '#3D1A00');
+  document.getElementById('g2').setAttribute('stop-color', lvl.to);
+
+  // free wash
+  if(c.free_wash > 0) document.getElementById('fwBadge').style.display = 'flex';
+
+  // QR
   const qrVal = `https://moahedyounes-debug.github.io/RH/customer-membership.html?m=${c.membership}`;
-  new QRious({
-    element: document.getElementById("qrCanvas"),
-    value: qrVal,
-    size: 110,
-    level: "H",
-    background: "#ffffff",
-    foreground: "#000000"
-  });
+  new QRious({ element: document.getElementById('qrCanvas'), value: qrVal, size:105, level:'H', background:'#fff', foreground:'#000' });
 
-  // غسيل مجاني
-  if (c.free_wash > 0) {
-    document.getElementById("freeWashBadge").style.display = "flex";
-  }
-
-  // إظهار المحتوى
-  document.getElementById("loadingState").style.display = "none";
-  document.getElementById("mainContent").style.display = "block";
+  // show
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
 }
 
-/* ================================================
-   RENDER DATA
-================================================ */
-function renderData(c) {
-  document.getElementById("infoPoints").textContent    = c.points.toLocaleString("ar-SA");
-  document.getElementById("infoLevelIcon").textContent = getLevelStyle(c.level).icon;
-  document.getElementById("infoLevel").textContent     = getLevelStyle(c.level).ar;
-  document.getElementById("infoVisits").textContent    = c.visit_count;
-  document.getElementById("infoLastVisit").textContent = c.last_visit !== "—" ? c.last_visit : "لا يوجد";
+/* ── RENDER STATS ── */
+function renderStats(c){
+  const lvl = getLvl(c.level);
+  document.getElementById('sPoints').textContent  = c.points.toLocaleString('ar-SA');
+  document.getElementById('sLvlIcon').textContent = lvl.icon;
+  document.getElementById('sLvl').textContent     = lvl.ar;
+  document.getElementById('sVisits').textContent  = c.visit_count;
+  document.getElementById('sLast').textContent    = c.last_visit !== '—' ? c.last_visit : 'لا يوجد';
 
-  document.getElementById("dataName").textContent         = c.name;
-  document.getElementById("dataPhone").textContent        = c.phone;
-  document.getElementById("dataMembership").textContent   = c.membership;
-  document.getElementById("dataSubscription").textContent = c.subscription;
-  document.getElementById("dataCity").textContent         = c.city || "—";
+  document.getElementById('dName').textContent  = c.name;
+  document.getElementById('dPhone').textContent = c.phone;
+  document.getElementById('dMem').textContent   = c.membership;
+  document.getElementById('dSub').textContent   = c.subscription;
+  document.getElementById('dCity').textContent  = c.city || '—';
 }
 
-/* ================================================
-   LEVEL PROGRESS — من شيت Level الفعلي
-================================================ */
-async function loadLevelProgress(c) {
-  const points = c.points;
-
-  const res = await apiGetLevels();
+/* ── PROGRESS ── */
+async function loadProgress(c){
+  const pts = c.points;
+  const res = await apiGetLevels().catch(()=>({success:false}));
 
   let levels = [];
-  if (res.success && res.levels && res.levels.length) {
-    levels = res.levels.map(r => ({
-      level: r[0],
-      from:  Number(r[1]),
-      to:    r[2] === "" || r[2] === null ? null : Number(r[2])
-    }));
+  if(res.success && res.levels?.length){
+    levels = res.levels.map(r=>({level:r[0], from:Number(r[1]), to: r[2]===''||r[2]==null ? null : Number(r[2])}));
   } else {
-    // fallback إذا ما رد الـ API
-    levels = [
-      { level: "Bronze",   from: 0,    to: 499  },
-      { level: "Silver",   from: 500,  to: 1499 },
-      { level: "Gold",     from: 1500, to: 3999 },
-      { level: "Platinum", from: 4000, to: 7999 },
-      { level: "VIP",      from: 8000, to: null },
-    ];
+    levels = [{level:'Bronze',from:0,to:499},{level:'Silver',from:500,to:1499},{level:'Gold',from:1500,to:3999},{level:'Platinum',from:4000,to:7999},{level:'VIP',from:8000,to:null}];
   }
 
-  const current = levels.find(l => {
-    if (l.to === null) return points >= l.from;
-    return points >= l.from && points <= l.to;
-  });
+  const cur = levels.find(l => l.to===null ? pts>=l.from : pts>=l.from && pts<=l.to);
+  if(!cur) return;
 
-  if (!current) return;
-
-  let pct = 0, nextText = "";
-  if (current.to === null) {
-    pct = 100;
-    nextText = "أعلى مستوى 🎉";
-  } else {
-    const range = current.to - current.from;
-    pct = Math.min(100, Math.max(0, ((points - current.from) / range) * 100));
-    const remaining = current.to - points + 1;
-    const nextLevel = levels.find(l => l.from > current.from);
-    const nextAr = nextLevel ? (getLevelStyle(nextLevel.level).ar || nextLevel.level) : "";
-    nextText = `${remaining} نقطة للـ ${nextAr}`;
+  let pct=0, nextTxt='';
+  if(cur.to===null){ pct=100; nextTxt='أعلى مستوى 🎉'; }
+  else{
+    const range = cur.to - cur.from;
+    pct = Math.min(100,((pts-cur.from)/range)*100);
+    const next = levels.find(l=>l.from>cur.from);
+    nextTxt = `${(cur.to-pts+1).toLocaleString('ar-SA')} نقطة للـ ${next ? getLvl(next.level).ar : ''}`;
   }
 
-  setTimeout(() => {
-    document.getElementById("progressFill").style.width = pct + "%";
-  }, 400);
+  const lvlClr = getLvl(cur.level);
+  document.getElementById('progFill').style.cssText = `width:${pct}%; --fill-a:${lvlClr.from}; --fill-b:${lvlClr.to}`;
+  document.getElementById('pCurr').textContent = pts.toLocaleString('ar-SA') + ' نقطة';
+  document.getElementById('pNext').textContent = nextTxt;
 
-  document.getElementById("progressCurrent").textContent = points.toLocaleString("ar-SA") + " نقطة";
-  document.getElementById("progressNext").textContent = nextText;
-
-  // Level badges
-  const levelRow = document.getElementById("levelRow");
-  const curIdx = levels.findIndex(l => l.level === current.level);
-  levelRow.innerHTML = levels.map((l, i) => {
-    const s = getLevelStyle(l.level);
-    const done = i <= curIdx;
-    return `<div class="level-chip ${done ? 'done' : ''}" style="border-color:${s.color};color:${s.color}">${s.icon} ${s.ar || l.level}</div>`;
-  }).join("");
+  const curIdx = levels.findIndex(l=>l.level===cur.level);
+  document.getElementById('lvlRow').innerHTML = levels.map((l,i)=>{
+    const s = getLvl(l.level);
+    const done = i<=curIdx;
+    return `<div class="lvl-chip ${done?'active':''}" style="border-color:${s.color};color:${s.color}">${s.icon} ${s.ar}</div>`;
+  }).join('');
 }
 
-/* ================================================
-   RECENT VISITS
-================================================ */
-async function loadRecentVisits(membership) {
-  const box = document.getElementById("visitsBox");
-  const res = await apiGetVisitsByMembership(membership);
+/* ── VISITS ── */
+async function loadVisits(membership){
+  const box = document.getElementById('visitsBox');
+  const res = await apiGetVisitsByMembership(membership).catch(()=>({success:false}));
+  if(!res.success || !res.visits?.length){ box.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">لا توجد زيارات</div>'; return; }
 
-  if (!res.success || !res.visits || !res.visits.length) {
-    box.innerHTML = `<div style="text-align:center;color:#90CAF9;padding:20px;font-size:13px">لا توجد زيارات سابقة</div>`;
-    return;
-  }
-
-  // الزيارات بترتيب عكسي (الأحدث أولاً)، آخر 5
-  const visits = res.visits.map(v => v.data || v).reverse().slice(0, 5);
-
-  box.innerHTML = visits.map(row => {
-    const v = parseVisit(row);
+  const visits = res.visits.map(v=>parseVisit(v.data||v)).reverse().slice(0,5);
+  box.innerHTML = visits.map(v=>{
     const dt = formatCheckIn(v.check_in);
-    return `
-      <div class="visit-item">
-        <div class="visit-icon">🚗</div>
-        <div class="visit-info">
-          <div class="visit-service">${v.service || "غسيل"}</div>
-          <div class="visit-date">${dt.date} ${dt.time ? "· " + dt.time : ""} ${v.branch ? "· " + v.branch : ""}</div>
-        </div>
-        <div class="visit-pts">+${v.points} نقطة<br><span style="font-size:11px;color:#90CAF9;font-weight:400">${v.price ? v.price + " ر" : ""}</span></div>
+    return `<div class="visit-item">
+      <div class="v-icon">🚗</div>
+      <div class="v-info">
+        <div class="v-svc">${v.service||'غسيل'}</div>
+        <div class="v-date">${dt.date||'—'} ${dt.time?'· '+dt.time:''} ${v.branch?'· '+v.branch:''}</div>
       </div>
-    `;
-  }).join("");
+      <div class="v-pts">+${v.points}<br><span style="font-size:10px;font-weight:400;color:var(--muted)">${v.price?v.price.toLocaleString()+'ر':''}</span></div>
+    </div>`;
+  }).join('');
 }
 
-/* ================================================
-   WALLET LINKS
-================================================ */
-async function loadWalletLinks(phone) {
-  const res = await apiGetPassLinksByPhone(phone);
-  if (!res.success) return;
-
-  const apple  = res.appleWallet;
-  const google = res.googleWallet;
-  const container = document.getElementById("wallet-buttons");
-  const appleBtn  = document.getElementById("apple-wallet-btn");
-  const googleBtn = document.getElementById("google-wallet-btn");
-
-  if (apple) {
-    appleBtn.href = apple;
-    appleBtn.style.display = "flex";
-  }
-  if (google) {
-    googleBtn.href = google;
-    googleBtn.style.display = "flex";
-  }
-  if (apple || google) {
-    container.style.display = "flex";
-  }
+/* ── WALLET ── */
+async function loadWallet(phone){
+  const res = await apiGetPassLinksByPhone(phone).catch(()=>({success:false}));
+  if(!res.success) return;
+  const row = document.getElementById('walletRow');
+  const aBtn = document.getElementById('appleBtn');
+  const gBtn = document.getElementById('googleBtn');
+  if(res.appleWallet){ aBtn.href=res.appleWallet; aBtn.style.display='flex'; }
+  if(res.googleWallet){ gBtn.href=res.googleWallet; gBtn.style.display='flex'; }
+  if(res.appleWallet||res.googleWallet) row.style.display='flex';
 }
 
-/* ================================================
-   ERROR
-================================================ */
-function showError(title, msg) {
-  document.getElementById("loadingState").style.display = "none";
-  document.getElementById("errorState").style.display = "block";
-  document.querySelector("#errorState .error-title").textContent = title;
-  document.querySelector("#errorState .error-msg").textContent   = msg;
+function showErr(msg){
+  document.getElementById('loadingState').innerHTML = `<div style="padding:40px;text-align:center"><div style="font-size:40px;margin-bottom:12px">⚠️</div><div style="font-size:16px;font-weight:700">${msg}</div><a href="customer-home.html" style="display:inline-block;margin-top:16px;padding:10px 24px;background:var(--gold);color:#000;border-radius:10px;text-decoration:none;font-weight:700">تسجيل الدخول</a></div>`;
 }
 </script>
 </body>
